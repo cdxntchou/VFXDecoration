@@ -673,7 +673,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 49.79, y: 38.913002, z: -0.001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &531598550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1182,19 +1182,19 @@ VisualEffect:
       - m_Value: {x: 273.02917, y: 19.179544, z: 136.23286}
         m_Name: lodTarget
         m_Overridden: 1
-      - m_Value: {x: 310.71106, y: 12.629125, z: 365.05597}
+      - m_Value: {x: 253.03293, y: -7.571231, z: 187.48647}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 140, y: 200, z: 140}
         m_Name: tilingVolume_size
         m_Overridden: 1
-      - m_Value: {x: 308.62494, y: 13.9332905, z: 295.0992}
+      - m_Value: {x: 186.64902, y: 12.55486, z: 178.09949}
         m_Name: fadeCenter
         m_Overridden: 1
-      - m_Value: {x: 310.71127, y: 0, z: 295.05627}
+      - m_Value: {x: 253.03293, y: 0, z: 198.74323}
         m_Name: createBounds_center
         m_Overridden: 1
-      - m_Value: {x: 139.99963, y: 0, z: 0.000579834}
+      - m_Value: {x: 140, y: 0, z: 117.48645}
         m_Name: createBounds_size
         m_Overridden: 1
       - m_Value: {x: 0, y: 0, z: 15}
@@ -1212,7 +1212,7 @@ VisualEffect:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 1
+      - m_Value: 246721
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1249,7 +1249,7 @@ MonoBehaviour:
   followSceneCameraInEditor: 1
   volumeSize: 140
   forwardBiasDistance: 70
-  density: 15
+  density: 20
 --- !u!1 &1149493693
 GameObject:
   m_ObjectHideFlags: 0

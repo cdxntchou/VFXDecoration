@@ -46,15 +46,9 @@ public class TerrainVFXController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        spawnTrigger = true;
         idsSet = false;
-        lastBounds.width = 0.0f;
-        lastBounds.height = 0.0f;
-    }
-
-    private void Awake()
-    {
-        lastBounds.width = 0.0f;
-        lastBounds.height = 0.0f;
+        lastBounds.Set(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     private void OnEnable()
@@ -303,6 +297,25 @@ public class TerrainVFXController : MonoBehaviour
             eventAttr4 = vfx.CreateVFXEventAttribute();
         }
 
+        Transform lodTransform = lodTarget;
+#if UNITY_EDITOR
+        if (followSceneCameraInEditor && Application.isEditor && !Application.isPlaying)
+        {
+            lodTransform = SceneView.lastActiveSceneView.camera.transform;
+        }
+#endif
+
+        if (spawnTrigger && (eventAttr != null))
+        {
+            SetupIDS();
+
+            vfx.Reinit();
+            lastBounds.Set(
+                lodTransform.position.x, lodTransform.position.z, 0.0f, 0.0f);
+
+            spawnTrigger = false;
+        }
+
         if ((vfx != null) && (terrain != null))
         {
             SetupIDS();
@@ -318,14 +331,6 @@ public class TerrainVFXController : MonoBehaviour
 
             vfx.SetTexture(alphamapID, terrain.terrainData.alphamapTextures[0]);
             vfx.SetVector4(alphamapMaskID, new Vector4(1.0f, 0.0f, 0.0f, 0.0f));
-
-            Transform lodTransform = lodTarget;
-#if UNITY_EDITOR
-            if (followSceneCameraInEditor && Application.isEditor && !Application.isPlaying)
-            {
-                lodTransform = SceneView.lastActiveSceneView.camera.transform;
-            }
-#endif
 
             Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
             Vector3 tilingVolumeSize = new Vector3(volumeSize, 200.0f, volumeSize);
@@ -346,16 +351,6 @@ public class TerrainVFXController : MonoBehaviour
                 tilingVolumeSize.z);
 
             SpawnForNewBounds(newBounds);
-        }
-
-        if (spawnTrigger && (eventAttr != null))
-        {
-            SetupIDS();
-//             eventAttr.SetVector3("grenadeVolume_center", new Vector3(0.0f, 0.0f, 0.0f));
-//             eventAttr.SetFloat("grenadeVolume_radius", 1.0f);
-//             vfx.SendEvent("GrenadeExplosion", eventAttr);
-
-            spawnTrigger = false;
         }
     }
 }
