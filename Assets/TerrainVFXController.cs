@@ -50,15 +50,11 @@ public class TerrainVFXController : MonoBehaviour
     {
         resetAndRespawn = true;
         idsSet = false;
-        liveBounds.Set(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     private void OnEnable()
     {
         idsSet = false;
-        liveBounds.width = 0.0f;
-        liveBounds.height = 0.0f;
-
         TerrainCallbacks.heightmapChanged += TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged += TerrainTextureChangedCallback;
         resetAndRespawn = true;
@@ -66,9 +62,6 @@ public class TerrainVFXController : MonoBehaviour
     private void OnDisable()
     {
         idsSet = false;
-        liveBounds.width = 0.0f;
-        liveBounds.height = 0.0f;
-
         TerrainCallbacks.heightmapChanged -= TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged -= TerrainTextureChangedCallback;
         resetAndRespawn = true;
@@ -76,13 +69,11 @@ public class TerrainVFXController : MonoBehaviour
 
     void TerrainHeightmapChangedCallback(Terrain terrain, RectInt heightRegion, bool synched)
     {
-        Debug.Log("Heightmap changed");
         resetAndRespawn = true;
     }
 
     void TerrainTextureChangedCallback(Terrain terrain, string textureName, RectInt texelRegion, bool synched)
     {
-        Debug.Log("Texture changed");
         resetAndRespawn = true;
     }
 
@@ -114,10 +105,6 @@ public class TerrainVFXController : MonoBehaviour
         }
     }
 
-    void ResetAndRespawn()
-    { 
-    }
-
     void SpawnInRect(
         VFXEventAttribute attr,
         float minX, float maxX,
@@ -134,15 +121,18 @@ public class TerrainVFXController : MonoBehaviour
 
             if (count > 0)
             {
-                attr.SetInt(createCountID, count);
-                attr.SetVector3(createBoundsMinID, new Vector3(minX, 0.0f, minZ));
-                attr.SetVector3(createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+//                 attr.SetInt(createCountID, count);                                       // BUG : attributes don't seem to work
+//                 attr.SetVector3(createBoundsMinID, new Vector3(minX, 0.0f, minZ));
+//                 attr.SetVector3(createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
 
-//                 vfx.SetInt(createCountID, count);
+                vfx.SetInt(createCountID, count);
+                vfx.SetVector3(createBoundsMinID, new Vector3(minX, 0.0f, minZ));
+                vfx.SetVector3(createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+
 //                 vfx.SetVector3(createBoundsCenterID, new Vector3(minX + deltaX * 0.5f, 0.0f, minZ + deltaZ * 0.5f));
 //                 vfx.SetVector3(createBoundsSizeID, new Vector3(deltaX, 0.0f, deltaZ));
 
-                vfx.SendEvent("CreateInBounds", attr);
+                vfx.SendEvent("CreateInBounds", null);
                 vfx.Simulate(0.0f, 1);                  // HACK: workaround for one event per frame limit
             }
         }
@@ -189,6 +179,22 @@ public class TerrainVFXController : MonoBehaviour
     {
         Rect spawnBounds = newBounds;
 
+        // if the overlap region between live Bounds and newBounds is empty
+        // then we should just nuke and pave
+        // because doing the incremental expansion algorithm below is potentially much worse
+        // especially if the bounds have moved a long distance
+        if (!newBounds.Overlaps(liveBounds))
+        {
+            vfx.Reinit();
+            SpawnInRect(
+                eventAttr,
+                newBounds.xMin, newBounds.xMax,
+                newBounds.yMin, newBounds.yMax);
+            liveBounds = newBounds;
+            return;
+        }
+
+        // incremental update:
         // assuming we can only do one spawn, figure out the best border to spawn along...
         float xMinDelta = liveBounds.xMin - spawnBounds.xMin;
         float xMaxDelta = spawnBounds.xMax - liveBounds.xMax;
@@ -197,9 +203,6 @@ public class TerrainVFXController : MonoBehaviour
         float xDelta = Mathf.Max(xMinDelta, xMaxDelta);
         float yDelta = Mathf.Max(yMinDelta, yMaxDelta);
         float delta = Mathf.Max(xDelta, yDelta);
-
-        // TODO: if the overlap region is empty, we should just nuke and pave...
-        // doing the incremental expansion algorithm below is potentially much worse, especially if the bounds have moved a long distance
 
         if (delta > 0.0f)
         {
@@ -324,6 +327,7 @@ public class TerrainVFXController : MonoBehaviour
             eventAttr4 = vfx.CreateVFXEventAttribute();
         }
 
+        // compute tiling volume
         Transform lodTransform = lodTarget;
 #if UNITY_EDITOR
         if (followSceneCameraInEditor && Application.isEditor && !Application.isPlaying)
@@ -331,14 +335,22 @@ public class TerrainVFXController : MonoBehaviour
             lodTransform = SceneView.lastActiveSceneView.camera.transform;
         }
 #endif
+        Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
+        Vector3 tilingVolumeSize = new Vector3(volumeSize, 200.0f, volumeSize);
+
+        // now spawn new areas
+        Rect newBounds = new Rect(
+            tilingVolumeCenter.x - tilingVolumeSize.x * 0.5f,
+            tilingVolumeCenter.z - tilingVolumeSize.z * 0.5f,
+            tilingVolumeSize.x,
+            tilingVolumeSize.z);
 
         if (resetAndRespawn)
         {
             SetupIDS();
 
             vfx.Reinit();
-            liveBounds.Set(
-                lodTransform.position.x, lodTransform.position.z, 0.0f, 0.0f);
+            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
 
             resetAndRespawn = false;
         }
@@ -359,8 +371,6 @@ public class TerrainVFXController : MonoBehaviour
             vfx.SetTexture(alphamapID, terrain.terrainData.alphamapTextures[0]);
             vfx.SetVector4(alphamapMaskID, new Vector4(1.0f, 0.0f, 0.0f, 0.0f));
 
-            Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
-            Vector3 tilingVolumeSize = new Vector3(volumeSize, 200.0f, volumeSize);
             if (vfx.HasVector3(lodTargetID))
                 vfx.SetVector3(lodTargetID, tilingVolumeCenter);
 
@@ -369,13 +379,6 @@ public class TerrainVFXController : MonoBehaviour
 
             vfx.SetVector3(fadeCenterID, lodTransform.position);
             vfx.SetFloat(fadeDistanceID, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
-
-            // now spawn new areas
-            Rect newBounds = new Rect(
-                tilingVolumeCenter.x - tilingVolumeSize.x * 0.5f,
-                tilingVolumeCenter.z - tilingVolumeSize.z * 0.5f,
-                tilingVolumeSize.x,
-                tilingVolumeSize.z);
 
             SpawnForNewBounds(newBounds);
         }

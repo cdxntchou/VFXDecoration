@@ -667,13 +667,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 531598546}
-  m_LocalRotation: {x: 0.0043822355, y: -0.05120402, z: -0.00022469847, w: -0.9986786}
-  m_LocalPosition: {x: 191.82, y: 5.6360006, z: 169.924}
+  m_LocalRotation: {x: 0.004371062, y: -0.08792198, z: -0.00038582174, w: -0.99611765}
+  m_LocalPosition: {x: 339.6587, y: 8.967318, z: 151.36156}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -0.503, y: 10.088, z: 0}
 --- !u!114 &531598550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1166,7 +1166,7 @@ VisualEffect:
   m_PropertySheet:
     m_Float:
       m_Array:
-      - m_Value: 105
+      - m_Value: 147.5
         m_Name: fadeDistance
         m_Overridden: 1
     m_Vector2f:
@@ -1182,13 +1182,13 @@ VisualEffect:
       - m_Value: {x: 273.02917, y: 19.179544, z: 136.23286}
         m_Name: lodTarget
         m_Overridden: 1
-      - m_Value: {x: 356.5586, y: 7.717325, z: 333.3263}
+      - m_Value: {x: 346.87296, y: -5.238697, z: 246.21039}
         m_Name: tilingVolume_center
         m_Overridden: 1
-      - m_Value: {x: 140, y: 200, z: 140}
+      - m_Value: {x: 200, y: 200, z: 200}
         m_Name: tilingVolume_size
         m_Overridden: 1
-      - m_Value: {x: 305.18295, y: 8.601508, z: 285.78934}
+      - m_Value: {x: 338.2255, y: 8.453447, z: 152.60085}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: 356.5586, y: 0, z: 271.66315}
@@ -1203,6 +1203,12 @@ VisualEffect:
       - m_Value: {x: 10, y: 2000, z: 10}
         m_Name: destroyBounds_size
         m_Overridden: 1
+      - m_Value: {x: 446.87296, y: 0, z: 346.2104}
+        m_Name: createBounds_max
+        m_Overridden: 1
+      - m_Value: {x: 446.86917, y: 0, z: 146.21039}
+        m_Name: createBounds_min
+        m_Overridden: 1
     m_Vector4f:
       m_Array:
       - m_Value: {x: 1, y: 0, z: 0, w: 0}
@@ -1212,7 +1218,7 @@ VisualEffect:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 737314
+      - m_Value: 15
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1247,8 +1253,8 @@ MonoBehaviour:
   lodTarget: {fileID: 531598549}
   resetAndRespawn: 0
   followSceneCameraInEditor: 1
-  volumeSize: 140
-  forwardBiasDistance: 70
+  volumeSize: 200
+  forwardBiasDistance: 95
   density: 20
 --- !u!1 &1149493693
 GameObject:
@@ -1471,15 +1477,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 191.82
+      value: 339.6587
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.9360003
+      value: 5.394
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 175.924
+      value: 157.36156
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.x
