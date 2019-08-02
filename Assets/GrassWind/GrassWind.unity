@@ -1047,9 +1047,9 @@ GameObject:
   - component: {fileID: 1107586562}
   - component: {fileID: 1107586561}
   - component: {fileID: 1107586560}
+  - component: {fileID: 1107586565}
   - component: {fileID: 1107586564}
   - component: {fileID: 1107586563}
-  - component: {fileID: 1107586565}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -1182,13 +1182,13 @@ VisualEffect:
       - m_Value: {x: 273.02917, y: 19.179544, z: 136.23286}
         m_Name: lodTarget
         m_Overridden: 1
-      - m_Value: {x: 346.87296, y: -5.238697, z: 246.21039}
+      - m_Value: {x: 349.3101, y: -20.97533, z: 76.14527}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 200, y: 200, z: 200}
         m_Name: tilingVolume_size
         m_Overridden: 1
-      - m_Value: {x: 338.2255, y: 8.453447, z: 152.60085}
+      - m_Value: {x: 300.37842, y: 12.546802, z: 150.35416}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: 356.5586, y: 0, z: 271.66315}
@@ -1203,10 +1203,10 @@ VisualEffect:
       - m_Value: {x: 10, y: 2000, z: 10}
         m_Name: destroyBounds_size
         m_Overridden: 1
-      - m_Value: {x: 446.87296, y: 0, z: 346.2104}
+      - m_Value: {x: 449.3101, y: 0, z: 176.14526}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 446.86917, y: 0, z: 146.21039}
+      - m_Value: {x: 249.31009, y: 0, z: -23.854729}
         m_Name: createBounds_min
         m_Overridden: 1
     m_Vector4f:
@@ -1214,11 +1214,14 @@ VisualEffect:
       - m_Value: {x: 1, y: 0, z: 0, w: 0}
         m_Name: alphamapMask
         m_Overridden: 1
+      - m_Value: {x: 1, y: 0.4, z: 0.1, w: 0}
+        m_Name: alphamapSize
+        m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 15
+      - m_Value: 800000
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
