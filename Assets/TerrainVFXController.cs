@@ -10,14 +10,18 @@ using UnityEditor;
 public class TerrainVFXController : MonoBehaviour
 {
     public Transform lodTarget;
-    public float forwardBiasDistance;
     public bool spawnTrigger;
     public bool followSceneCameraInEditor;
+    public float volumeSize;
+    public float forwardBiasDistance;
     public float density;
 
     Terrain terrain;
     VisualEffect vfx;
     VFXEventAttribute eventAttr;
+    VFXEventAttribute eventAttr2;
+    VFXEventAttribute eventAttr3;
+    VFXEventAttribute eventAttr4;
     Rect lastBounds;
 
     // prop ids
@@ -42,16 +46,28 @@ public class TerrainVFXController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        spawnTrigger = true;
+        idsSet = false;
+        lastBounds.width = 0.0f;
+        lastBounds.height = 0.0f;
+    }
+
+    private void Awake()
+    {
+        lastBounds.width = 0.0f;
+        lastBounds.height = 0.0f;
     }
 
     private void OnEnable()
     {
         idsSet = false;
+        lastBounds.width = 0.0f;
+        lastBounds.height = 0.0f;
     }
     private void OnDisable()
     {
         idsSet = false;
+        lastBounds.width = 0.0f;
+        lastBounds.height = 0.0f;
     }
 
     void SetupIDS()
@@ -81,6 +97,7 @@ public class TerrainVFXController : MonoBehaviour
     }
 
     void SpawnInRect(
+        VFXEventAttribute attr,
         float minX, float maxX,
         float minZ, float maxZ, int pass = 1)
     {
@@ -95,18 +112,20 @@ public class TerrainVFXController : MonoBehaviour
 
             if (count > 0)
             {
-                eventAttr.SetInt(createCountID, count);
-                eventAttr.SetVector3(createBoundsCenterID, new Vector3(minX + deltaX * 0.5f, 0.0f, minZ + deltaZ * 0.5f));
-                eventAttr.SetVector3(createBoundsSizeID, new Vector3(deltaX, 0.0f, deltaZ));
+                // attr = vfx.CreateVFXEventAttribute();
+
+//                 attr.SetInt(createCountID, count);
+//                 attr.SetVector3(createBoundsCenterID, new Vector3(minX + deltaX * 0.5f, 0.0f, minZ + deltaZ * 0.5f));
+//                 attr.SetVector3(createBoundsSizeID, new Vector3(deltaX, 0.0f, deltaZ));
 
                 vfx.SetInt(createCountID, count);
                 vfx.SetVector3(createBoundsCenterID, new Vector3(minX + deltaX * 0.5f, 0.0f, minZ + deltaZ * 0.5f));
                 vfx.SetVector3(createBoundsSizeID, new Vector3(deltaX, 0.0f, deltaZ));
 
                 if (pass == 2)
-                    vfx.SendEvent("CreateInBounds2", eventAttr);
+                    vfx.SendEvent("CreateInBounds2", attr);
                 else
-                    vfx.SendEvent("CreateInBounds", eventAttr);
+                    vfx.SendEvent("CreateInBounds", attr);
             }
         }
     }
@@ -141,53 +160,126 @@ public class TerrainVFXController : MonoBehaviour
                     vfx.SetVector3(destroyBoundsCenterID, new Vector3(lastBounds.center.x, 0.0f, lastBounds.center.y));
                     vfx.SetVector3(destroyBoundsSizeID, new Vector3(lastBounds.width, 2000.0f, lastBounds.height));
 
-                    vfx.SendEvent("CreateInBounds", eventAttr);
+                    vfx.SendEvent("CreateInBounds", null);
                 }
             }
         }
+        lastBounds = newBounds;
     }
 
     void SpawnForNewBounds(Rect newBounds)
     {
         Rect spawnBounds = newBounds;
 
-        // first spawn along +/- X border
-        if (spawnBounds.xMin < lastBounds.xMin)
-        {
-            // spawn between spawn.xMin and last.xMin
-            SpawnInRect(
-                spawnBounds.xMin, lastBounds.xMin,
-                spawnBounds.yMin, spawnBounds.yMax);
+        // assuming we can only do one spawn, figure out the best border to spawn along...
+        float xMinDelta = lastBounds.xMin - spawnBounds.xMin;
+        float xMaxDelta = spawnBounds.xMax - lastBounds.xMax;
+        float yMinDelta = lastBounds.yMin - spawnBounds.yMin;
+        float yMaxDelta = spawnBounds.yMax - lastBounds.yMax;
+        float xDelta = Mathf.Max(xMinDelta, xMaxDelta);
+        float yDelta = Mathf.Max(yMinDelta, yMaxDelta);
+        float delta = Mathf.Max(xDelta, yDelta);
 
-            // clip away the spawned region from the spawnBounds
-            spawnBounds.xMin = lastBounds.xMin;
-        }
-        if (spawnBounds.xMax > lastBounds.xMax)
+        if (delta > 0.0f)
         {
-            // spawn between last.xMax and spawn.xMax
-            SpawnInRect(
-                lastBounds.xMax, spawnBounds.xMax,
-                spawnBounds.yMin, spawnBounds.yMax);
+            if (xDelta > yDelta)
+            {
+                // spawn along x -- first trim along y
+                lastBounds.yMin = Mathf.Max(lastBounds.yMin, spawnBounds.yMin);
+                lastBounds.yMax = Mathf.Min(lastBounds.yMax, spawnBounds.yMax);
+                if (xMinDelta > xMaxDelta)
+                {
+                    // spawn along xMin, and last.xMin to indicate we covered it
+                    SpawnInRect(
+                        eventAttr,
+                        spawnBounds.xMin, lastBounds.xMin,
+                        lastBounds.yMin, lastBounds.yMax);
 
-            // clip away the spawned region from the spawnBounds
-            spawnBounds.xMax = lastBounds.xMax;
+                    lastBounds.xMin = spawnBounds.xMin;
+                }
+                else
+                {
+                    // spawn along xMax, and last.xMax to indicate we covered it
+                    SpawnInRect(
+                        eventAttr,
+                        lastBounds.xMax, spawnBounds.xMax,
+                        lastBounds.yMin, lastBounds.yMax);
+
+                    lastBounds.xMax = spawnBounds.xMax;
+                }
+            }
+            else
+            {
+                // spawn along y -- first trim along x
+                lastBounds.xMin = Mathf.Max(lastBounds.xMin, spawnBounds.xMin);
+                lastBounds.xMax = Mathf.Min(lastBounds.xMax, spawnBounds.xMax);
+                if (yMinDelta > yMaxDelta)
+                {
+                    // spawn along yMin, and last.yMin to indicate we covered it
+                    SpawnInRect(
+                        eventAttr,
+                        lastBounds.xMin, lastBounds.xMax,
+                        spawnBounds.yMin, lastBounds.yMin);
+
+                    lastBounds.yMin = spawnBounds.yMin;
+                }
+                else
+                {
+                    // spawn along yMax, and last.yMax to indicate we covered it
+                    SpawnInRect(
+                        eventAttr,
+                        lastBounds.xMin, lastBounds.xMax,
+                        lastBounds.yMax, spawnBounds.yMax);
+
+                    lastBounds.yMax = spawnBounds.yMax;
+                }
+            }
         }
 
-        // spawn aloong +/- Y border
-        if (spawnBounds.yMin < lastBounds.yMin)
-        {
-            // spawn between spawn.yMin and last.yMin
-            SpawnInRect(
-                spawnBounds.xMin, spawnBounds.xMax,
-                spawnBounds.yMin, lastBounds.yMin, 2);
-        }
-        if (spawnBounds.yMax > lastBounds.yMax)
-        {
-            // spawn between last.yMax and spawn.yMax
-            SpawnInRect(
-                spawnBounds.xMin, spawnBounds.xMax,
-                lastBounds.yMax, spawnBounds.yMax, 2);
-        }
+        /*
+                // first spawn along +/- X border
+                if (spawnBounds.xMin < lastBounds.xMin)
+                {
+                    // spawn between spawn.xMin and last.xMin
+                    SpawnInRect(
+                        eventAttr,
+                        spawnBounds.xMin, lastBounds.xMin,
+                        spawnBounds.yMin, spawnBounds.yMax);
+
+                    // clip away the spawned region from the spawnBounds
+                    spawnBounds.xMin = lastBounds.xMin;
+                }
+                if (spawnBounds.xMax > lastBounds.xMax)
+                {
+                    // spawn between last.xMax and spawn.xMax
+                    SpawnInRect(
+                        eventAttr2,
+                        lastBounds.xMax, spawnBounds.xMax,
+                        spawnBounds.yMin, spawnBounds.yMax);
+
+                    // clip away the spawned region from the spawnBounds
+                    spawnBounds.xMax = lastBounds.xMax;
+                }
+
+                // spawn along +/- Y border
+                if (spawnBounds.yMin < lastBounds.yMin)
+                {
+                    // spawn between spawn.yMin and last.yMin
+                    SpawnInRect(
+                        eventAttr3,
+                        spawnBounds.xMin, spawnBounds.xMax,
+                        spawnBounds.yMin, lastBounds.yMin, 2);
+                }
+                if (spawnBounds.yMax > lastBounds.yMax)
+                {
+                    // spawn between last.yMax and spawn.yMax
+                    SpawnInRect(
+                        eventAttr4,
+                        spawnBounds.xMin, spawnBounds.xMax,
+                        lastBounds.yMax, spawnBounds.yMax, 2);
+                }
+                lastBounds = newBounds;
+        */
     }
 
     // Update is called once per frame
@@ -206,6 +298,9 @@ public class TerrainVFXController : MonoBehaviour
         if ((eventAttr == null) && (vfx != null))
         {
             eventAttr = vfx.CreateVFXEventAttribute();
+            eventAttr2 = vfx.CreateVFXEventAttribute();
+            eventAttr3 = vfx.CreateVFXEventAttribute();
+            eventAttr4 = vfx.CreateVFXEventAttribute();
         }
 
         if ((vfx != null) && (terrain != null))
@@ -233,7 +328,7 @@ public class TerrainVFXController : MonoBehaviour
 #endif
 
             Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
-            Vector3 tilingVolumeSize = new Vector3(10.0f, 200.0f, 10.0f);
+            Vector3 tilingVolumeSize = new Vector3(volumeSize, 200.0f, volumeSize);
             if (vfx.HasVector3(lodTargetID))
                 vfx.SetVector3(lodTargetID, tilingVolumeCenter);
 
@@ -241,7 +336,7 @@ public class TerrainVFXController : MonoBehaviour
             vfx.SetVector3(tilingVolumeSizeID, tilingVolumeSize);
 
             vfx.SetVector3(fadeCenterID, lodTransform.position);
-            vfx.SetFloat(fadeDistanceID, 160.0f * 0.5f + forwardBiasDistance * 0.5f);
+            vfx.SetFloat(fadeDistanceID, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
 
             // now spawn new areas
             Rect newBounds = new Rect(
@@ -250,9 +345,7 @@ public class TerrainVFXController : MonoBehaviour
                 tilingVolumeSize.x,
                 tilingVolumeSize.z);
 
-            SpawnForNewBoundsHAX(newBounds);
-
-            lastBounds = newBounds;
+            SpawnForNewBounds(newBounds);
         }
 
         if (spawnTrigger && (eventAttr != null))
