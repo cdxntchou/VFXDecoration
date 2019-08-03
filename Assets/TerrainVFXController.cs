@@ -119,7 +119,7 @@ public class TerrainVFXType
             vfx.SetVector3(TerrainVFXProperties.heightmapSize, size);
 
             vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
-            vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
+            // vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
 
             if (vfx.HasVector3(TerrainVFXProperties.lodTarget))
                 vfx.SetVector3(TerrainVFXProperties.lodTarget, tilingVolumeCenter);
@@ -326,6 +326,9 @@ public class TerrainVFXController : MonoBehaviour
     [SerializeField]
     public TerrainVFXType vfx0;
 
+    [SerializeField]
+    public TerrainVFXType vfx1;
+
     // runtime state
     Terrain terrain;
 
@@ -380,6 +383,7 @@ public class TerrainVFXController : MonoBehaviour
         TerrainVFXProperties.Setup();
 
         vfx0.Update(this, terrain, lodTransform, resetAndRespawn);
+        vfx1.Update(this, terrain, lodTransform, resetAndRespawn);
         resetAndRespawn = false;
     }
 }
