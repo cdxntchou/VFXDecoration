@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.VFX;
 using UnityEngine.Experimental.TerrainAPI;
+using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -13,21 +14,19 @@ internal static class TerrainVFXProperties
     static private bool idsSetup = false;
 
     // prop ids
-    static public int heightmapID               { get; private set; }
-    static public int heightmapPositionID       { get; private set; }
-    static public int heightmapSizeID           { get; private set; }
-    static public int tilingVolumeCenterID      { get; private set; }
-    static public int tilingVolumeSizeID        { get; private set; }
-    static public int lodTargetID               { get; private set; }
-    static public int alphamapID                { get; private set; }
-    static public int alphamapSizeID            { get; private set; }
-    static public int fadeCenterID              { get; private set; }
-    static public int fadeDistanceID            { get; private set; }
-    static public int createCountID             { get; private set; }
-    static public int createBoundsCenterID      { get; private set; }
-    static public int createBoundsSizeID        { get; private set; }
-    static public int createBoundsMinID         { get; private set; }
-    static public int createBoundsMaxID         { get; private set; }
+    static public int heightmap               { get; private set; }
+    static public int heightmapPosition       { get; private set; }
+    static public int heightmapSize           { get; private set; }
+    static public int tilingVolumeCenter      { get; private set; }
+    static public int tilingVolumeSize        { get; private set; }
+    static public int lodTarget               { get; private set; }
+    static public int alphamap                { get; private set; }
+    static public int alphamapSize            { get; private set; }
+    static public int fadeCenter              { get; private set; }
+    static public int fadeDistance            { get; private set; }
+    static public int createCount             { get; private set; }
+    static public int createBoundsMin         { get; private set; }
+    static public int createBoundsMax         { get; private set; }
 
     static public void Reset()
     {
@@ -38,22 +37,20 @@ internal static class TerrainVFXProperties
     {
         if (!idsSetup)
         {
-            heightmapID = Shader.PropertyToID("Heightmap");
-            heightmapPositionID = Shader.PropertyToID("Heightmap_Position");
-            heightmapSizeID = Shader.PropertyToID("Heightmap_Size");
-            tilingVolumeCenterID = Shader.PropertyToID("tilingVolume_center");
-            tilingVolumeSizeID = Shader.PropertyToID("tilingVolume_size");
-            lodTargetID = Shader.PropertyToID("lodTarget");
-            alphamapID = Shader.PropertyToID("alphamap");
-            alphamapSizeID = Shader.PropertyToID("alphamapSize");
-            fadeCenterID = Shader.PropertyToID("fadeCenter");
-            fadeDistanceID = Shader.PropertyToID("fadeDistance");
+            heightmap = Shader.PropertyToID("Heightmap");
+            heightmapPosition = Shader.PropertyToID("Heightmap_Position");
+            heightmapSize = Shader.PropertyToID("Heightmap_Size");
+            tilingVolumeCenter = Shader.PropertyToID("tilingVolume_center");
+            tilingVolumeSize = Shader.PropertyToID("tilingVolume_size");
+            lodTarget = Shader.PropertyToID("lodTarget");
+            alphamap = Shader.PropertyToID("alphamap");
+            alphamapSize = Shader.PropertyToID("alphamapSize");
+            fadeCenter = Shader.PropertyToID("fadeCenter");
+            fadeDistance = Shader.PropertyToID("fadeDistance");
 
-            createCountID = Shader.PropertyToID("createCount");
-            createBoundsCenterID = Shader.PropertyToID("createBounds_center");
-            createBoundsSizeID = Shader.PropertyToID("createBounds_size");
-            createBoundsMinID = Shader.PropertyToID("createBounds_min");
-            createBoundsMaxID = Shader.PropertyToID("createBounds_max");
+            createCount = Shader.PropertyToID("createCount");
+            createBoundsMin = Shader.PropertyToID("createBounds_min");
+            createBoundsMax = Shader.PropertyToID("createBounds_max");
 
             idsSetup = true;
         }
@@ -61,6 +58,7 @@ internal static class TerrainVFXProperties
 }
 
 
+[Serializable]
 public class TerrainVFXType
 {
     // serialized settings
@@ -72,93 +70,67 @@ public class TerrainVFXType
     // runtime state
     GameObject vfxObject;
     VisualEffect vfx;
-    VFXEventAttribute eventAttr;
-    Rect liveBounds;                // area that is currently fully spawned
-};
+    // VFXEventAttribute eventAttr;
+    Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
 
-
-[ExecuteInEditMode]
-public class TerrainVFXController : MonoBehaviour
-{
-    public Transform lodTarget;
-    public bool resetAndRespawn;
-    public bool followSceneCameraInEditor;
-    public float volumeSize;
-    public float forwardBiasDistance;
-    public float density;
-
-    Terrain terrain;
-    VisualEffect vfx;
-    VFXEventAttribute eventAttr;
-//     VFXEventAttribute eventAttr2;
-//     VFXEventAttribute eventAttr3;
-//     VFXEventAttribute eventAttr4;
-    Rect liveBounds;                // area that is currently fully spawned
-    Vector3 tilingVolumeCenter;
-    Vector3 tilingVolumeSize;
-
-    // Start is called before the first frame update
-    void Start()
+    public void Update(TerrainVFXController controller, Terrain terrain, Transform lodTransform, bool resetAndRespawn)
     {
-        resetAndRespawn = true;
-        TerrainVFXProperties.Reset();
-    }
+        if ((vfxPrefab == null) || (terrain == null))
+            return;
 
-    private void OnEnable()
-    {
-        TerrainVFXProperties.Reset();
-        TerrainCallbacks.heightmapChanged += TerrainHeightmapChangedCallback;
-        TerrainCallbacks.textureChanged += TerrainTextureChangedCallback;
-        resetAndRespawn = true;
-    }
-    private void OnDisable()
-    {
-        TerrainVFXProperties.Reset();
-        TerrainCallbacks.heightmapChanged -= TerrainHeightmapChangedCallback;
-        TerrainCallbacks.textureChanged -= TerrainTextureChangedCallback;
-        resetAndRespawn = true;
-    }
-
-    void TerrainHeightmapChangedCallback(Terrain terrain, RectInt heightRegion, bool synched)
-    {
-        resetAndRespawn = true;
-    }
-
-    void TerrainTextureChangedCallback(Terrain terrain, string textureName, RectInt texelRegion, bool synched)
-    {
-        resetAndRespawn = true;
-    }
-
-    void SpawnInRect(
-        VFXEventAttribute attr,
-        float minX, float maxX,
-        float minZ, float maxZ)
-    {
-        float deltaX = Mathf.Max(maxX - minX, 0.0f);
-        float deltaZ = Mathf.Max(maxZ - minZ, 0.0f);
-        float area = deltaX * deltaZ;
-
-        if (area > 0.0f)
+        if (vfxObject == null)
         {
-            // dither the count to 'fix' rounding error for small areas
-            int count = Mathf.FloorToInt(area * density + Random.value - 0.001f);
+            vfxObject = GameObject.Instantiate(vfxPrefab, new Vector3(0, 0, 0), Quaternion.identity, controller.transform);
+            vfxObject.name = "VFX instance (hidden)";
+            vfxObject.hideFlags = HideFlags.HideAndDontSave;
 
-            if (count > 0)
-            {
-//                 attr.SetInt(createCountID, count);                                       // BUG : attributes don't seem to work
-//                 attr.SetVector3(createBoundsMinID, new Vector3(minX, 0.0f, minZ));
-//                 attr.SetVector3(createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+            vfx = vfxObject.GetComponent<VisualEffect>();
+            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+        }
 
-                vfx.SetInt(TerrainVFXProperties.createCountID, count);
-                vfx.SetVector3(TerrainVFXProperties.createBoundsMinID, new Vector3(minX, 0.0f, minZ));
-                vfx.SetVector3(TerrainVFXProperties.createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+        if (vfx == null)
+            return;
 
-//                 vfx.SetVector3(createBoundsCenterID, new Vector3(minX + deltaX * 0.5f, 0.0f, minZ + deltaZ * 0.5f));
-//                 vfx.SetVector3(createBoundsSizeID, new Vector3(deltaX, 0.0f, deltaZ));
+        Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
+        Vector3 tilingVolumeSize = new Vector3(volumeSize, 2000.0f, volumeSize);
 
-                vfx.SendEvent("CreateInBounds", null);
-//                vfx.Simulate(0.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
-            }
+        // target Bounds is what we would ideally want as our live bounds (fully populated area)
+        Rect targetBounds = new Rect(
+            tilingVolumeCenter.x - tilingVolumeSize.x * 0.5f,
+            tilingVolumeCenter.z - tilingVolumeSize.z * 0.5f,
+            tilingVolumeSize.x,
+            tilingVolumeSize.z);
+
+        if (resetAndRespawn)
+        {
+            vfx.Reinit();
+            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+        }
+
+        if ((vfx != null) && (terrain != null))
+        {
+            // terrain.terrainData.alphamapTextures[0]
+
+            vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
+            vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
+
+            Vector3 size = terrain.terrainData.size;
+            size.y *= 2.0f;     // faked because our heightmap is only [0-0.5]
+            vfx.SetVector3(TerrainVFXProperties.heightmapSize, size);
+
+            vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
+            vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
+
+            if (vfx.HasVector3(TerrainVFXProperties.lodTarget))
+                vfx.SetVector3(TerrainVFXProperties.lodTarget, tilingVolumeCenter);
+
+            vfx.SetVector3(TerrainVFXProperties.tilingVolumeCenter, tilingVolumeCenter);
+            vfx.SetVector3(TerrainVFXProperties.tilingVolumeSize, tilingVolumeSize);
+
+            vfx.SetVector3(TerrainVFXProperties.fadeCenter, lodTransform.position);
+            vfx.SetFloat(TerrainVFXProperties.fadeDistance, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
+
+            UpdateLiveBounds(targetBounds);
         }
     }
 
@@ -170,9 +142,8 @@ public class TerrainVFXController : MonoBehaviour
         // especially if the bounds have moved a long distance
         if (!targetBounds.Overlaps(liveBounds))
         {
-            vfx.Reinit();
-            SpawnInRect(
-                eventAttr,
+            vfx.Reinit();           // nuke
+            SpawnInRect(            // pave
                 targetBounds.xMin, targetBounds.xMax,
                 targetBounds.yMin, targetBounds.yMax);
             liveBounds = targetBounds;
@@ -180,27 +151,24 @@ public class TerrainVFXController : MonoBehaviour
         }
 
         // incremental update:
-        
+
         // first we calculate the clipped live bounds, to check what we should cull
         Rect clippedBounds = liveBounds;
         clippedBounds.xMin = Mathf.Max(clippedBounds.xMin, targetBounds.xMin);
         clippedBounds.xMax = Mathf.Min(clippedBounds.xMax, targetBounds.xMax);
         clippedBounds.yMin = Mathf.Max(clippedBounds.yMin, targetBounds.yMin);
         clippedBounds.yMax = Mathf.Min(clippedBounds.yMax, targetBounds.yMax);
-        float clippedWidth = Mathf.Max(clippedBounds.xMax - clippedBounds.xMin, 0.0f);
-        float clippedHeight = Mathf.Max(clippedBounds.yMax - clippedBounds.yMin, 0.0f);
-        float clippedArea = clippedWidth * clippedHeight;
+        //         float clippedWidth = Mathf.Max(clippedBounds.xMax - clippedBounds.xMin, 0.0f);
+        //         float clippedHeight = Mathf.Max(clippedBounds.yMax - clippedBounds.yMin, 0.0f);
+        //         float clippedArea = clippedWidth * clippedHeight;
 
         // if clipping results in a significantly reduced area
-        float liveArea = liveBounds.width * liveBounds.height;
-        if (clippedArea < 0.80f * liveArea)
+        //         float liveArea = liveBounds.width * liveBounds.height;
+        // if (clippedArea < 0.90f * liveArea)                      // BUG: not sure why, but if I skip the cull here, it drops particle spawns below
         {
-            // first do a culling pass to free up particles
-//            vfx.SetVector3(TerrainVFXProperties.tilingVolumeCenterID, new Vector3(clippedBounds.center.x, 0.0f, clippedBounds.center.y));
-//            vfx.SetVector3(TerrainVFXProperties.tilingVolumeSizeID, new Vector3(clippedBounds.width, 2000.0f, clippedBounds.height));
+            // first do a culling pass against the new tiling area to free up particles
             vfx.Simulate(0.0f, 1);
-//            vfx.SetVector3(TerrainVFXProperties.tilingVolumeCenterID, tilingVolumeCenter);
-//            vfx.SetVector3(TerrainVFXProperties.tilingVolumeSizeID, tilingVolumeSize);
+            liveBounds = clippedBounds;
         }
 
         // assuming we can only do one spawn event, figure out the best border to spawn along...
@@ -224,7 +192,6 @@ public class TerrainVFXController : MonoBehaviour
                 {
                     // spawn along xMin, and last.xMin to indicate we covered it
                     SpawnInRect(
-                        eventAttr,
                         spawnBounds.xMin, liveBounds.xMin,
                         liveBounds.yMin, liveBounds.yMax);
 
@@ -234,7 +201,6 @@ public class TerrainVFXController : MonoBehaviour
                 {
                     // spawn along xMax, and last.xMax to indicate we covered it
                     SpawnInRect(
-                        eventAttr,
                         liveBounds.xMax, spawnBounds.xMax,
                         liveBounds.yMin, liveBounds.yMax);
 
@@ -250,7 +216,6 @@ public class TerrainVFXController : MonoBehaviour
                 {
                     // spawn along yMin, and last.yMin to indicate we covered it
                     SpawnInRect(
-                        eventAttr,
                         liveBounds.xMin, liveBounds.xMax,
                         spawnBounds.yMin, liveBounds.yMin);
 
@@ -260,7 +225,6 @@ public class TerrainVFXController : MonoBehaviour
                 {
                     // spawn along yMax, and last.yMax to indicate we covered it
                     SpawnInRect(
-                        eventAttr,
                         liveBounds.xMin, liveBounds.xMax,
                         liveBounds.yMax, spawnBounds.yMax);
 
@@ -269,7 +233,8 @@ public class TerrainVFXController : MonoBehaviour
             }
         }
 
-        /*
+        /* // This was the first algorithm I tried...  it requires more than one event per frame
+
                 // first spawn along +/- X border
                 if (spawnBounds.xMin < lastBounds.xMin)
                 {
@@ -315,27 +280,90 @@ public class TerrainVFXController : MonoBehaviour
         */
     }
 
+    void SpawnInRect(
+        float minX, float maxX,
+        float minZ, float maxZ)
+    {
+        float deltaX = Mathf.Max(maxX - minX, 0.0f);
+        float deltaZ = Mathf.Max(maxZ - minZ, 0.0f);
+        float area = deltaX * deltaZ;
+
+        if (area > 0.0f)
+        {
+            // dither the count to 'fix' rounding error for small areas
+            int count = Mathf.FloorToInt(area * density + UnityEngine.Random.value - 0.001f);
+
+            if (count > 0)
+            {
+                // BUG : can't seem to get attributes to work, just going to use properties for now
+                // eventAttr.SetInt(TerrainVFXProperties.createCountID, count);        
+                // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMinID, new Vector3(minX, 0.0f, minZ));
+                // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+
+                vfx.SetInt(TerrainVFXProperties.createCount, count);
+                vfx.SetVector3(TerrainVFXProperties.createBoundsMin, new Vector3(minX, 0.0f, minZ));
+                vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
+
+                vfx.SendEvent("CreateInBounds", null);
+                // vfx.Simulate(0.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
+            }
+        }
+    }
+};
+
+
+[ExecuteInEditMode]
+public class TerrainVFXController : MonoBehaviour
+{
+    // serialized settings and UI
+    public Transform lodTarget;
+    public bool resetAndRespawn;
+    public bool followSceneCameraInEditor;
+    public float volumeSize;
+    public float forwardBiasDistance;
+    public float density;
+
+    [SerializeField]
+    public TerrainVFXType vfx0;
+
+    // runtime state
+    Terrain terrain;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        resetAndRespawn = true;
+        TerrainVFXProperties.Reset();
+    }
+
+    private void OnEnable()
+    {
+        TerrainVFXProperties.Reset();
+        TerrainCallbacks.heightmapChanged += TerrainHeightmapChangedCallback;
+        TerrainCallbacks.textureChanged += TerrainTextureChangedCallback;
+        resetAndRespawn = true;
+    }
+    private void OnDisable()
+    {
+        TerrainVFXProperties.Reset();
+        TerrainCallbacks.heightmapChanged -= TerrainHeightmapChangedCallback;
+        TerrainCallbacks.textureChanged -= TerrainTextureChangedCallback;
+        resetAndRespawn = true;
+    }
+
+    void TerrainHeightmapChangedCallback(Terrain terrain, RectInt heightRegion, bool synched)
+    {
+        resetAndRespawn = true;
+    }
+
+    void TerrainTextureChangedCallback(Terrain terrain, string textureName, RectInt texelRegion, bool synched)
+    {
+        resetAndRespawn = true;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (vfx == null)
-        {
-            vfx = GetComponent<VisualEffect>();
-        }
-
-        if (terrain == null)
-        {
-            terrain = GetComponent<Terrain>();
-        }
-
-        if ((eventAttr == null) && (vfx != null))
-        {
-            eventAttr = vfx.CreateVFXEventAttribute();
-//             eventAttr2 = vfx.CreateVFXEventAttribute();
-//             eventAttr3 = vfx.CreateVFXEventAttribute();
-//             eventAttr4 = vfx.CreateVFXEventAttribute();
-        }
-
         // compute tiling volume
         Transform lodTransform = lodTarget;
 #if UNITY_EDITOR
@@ -344,50 +372,14 @@ public class TerrainVFXController : MonoBehaviour
             lodTransform = SceneView.lastActiveSceneView.camera.transform;
         }
 #endif
-        tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
-        tilingVolumeSize = new Vector3(volumeSize, 2000.0f, volumeSize);
 
-        // target Bounds is what we would ideally want as our live bounds (fully populated area)
-        Rect targetBounds = new Rect(
-            tilingVolumeCenter.x - tilingVolumeSize.x * 0.5f,
-            tilingVolumeCenter.z - tilingVolumeSize.z * 0.5f,
-            tilingVolumeSize.x,
-            tilingVolumeSize.z);
-
-        if (resetAndRespawn)
+        if (terrain == null)
         {
-            vfx.Reinit();
-            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
-
-            resetAndRespawn = false;
+            terrain = GetComponent<Terrain>();
         }
+        TerrainVFXProperties.Setup();
 
-        if ((vfx != null) && (terrain != null))
-        {
-            TerrainVFXProperties.Setup();
-
-            // terrain.terrainData.alphamapTextures[0]
-
-            vfx.SetTexture(TerrainVFXProperties.heightmapID, terrain.terrainData.heightmapTexture);
-            vfx.SetVector3(TerrainVFXProperties.heightmapPositionID, terrain.transform.position);
-
-            Vector3 size = terrain.terrainData.size;
-            size.y *= 2.0f;     // faked because our heightmap is only [0-0.5]
-            vfx.SetVector3(TerrainVFXProperties.heightmapSizeID, size);
-
-            vfx.SetTexture(TerrainVFXProperties.alphamapID, terrain.terrainData.alphamapTextures[0]);
-            vfx.SetVector4(TerrainVFXProperties.alphamapSizeID, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
-
-            if (vfx.HasVector3(TerrainVFXProperties.lodTargetID))
-                vfx.SetVector3(TerrainVFXProperties.lodTargetID, tilingVolumeCenter);
-
-            vfx.SetVector3(TerrainVFXProperties.tilingVolumeCenterID, tilingVolumeCenter);
-            vfx.SetVector3(TerrainVFXProperties.tilingVolumeSizeID, tilingVolumeSize);
-
-            vfx.SetVector3(TerrainVFXProperties.fadeCenterID, lodTransform.position);
-            vfx.SetFloat(TerrainVFXProperties.fadeDistanceID, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
-
-            UpdateLiveBounds(targetBounds);
-        }
+        vfx0.Update(this, terrain, lodTransform, resetAndRespawn);
+        resetAndRespawn = false;
     }
 }
