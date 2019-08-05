@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1196311057552498829}
   - component: {fileID: 2486549988562120526}
   m_Layer: 0
-  m_Name: TestPrefab
+  m_Name: GrassPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,7 +42,7 @@ VisualEffect:
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: 04edb77afebf3f34883605159d11492f, type: 3}
   m_StartSeed: 0
-  m_ResetSeedOnPlay: 1
+  m_ResetSeedOnPlay: 0
   m_PropertySheet:
     m_Float:
       m_Array: []

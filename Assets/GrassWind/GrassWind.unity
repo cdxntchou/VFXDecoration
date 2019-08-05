@@ -141,7 +141,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!2083052967 &23668837
 VisualEffect:
   m_ObjectHideFlags: 0
@@ -187,7 +187,7 @@ VisualEffect:
         m_Overridden: 1
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 0.884, y: 1.612, z: -0.117}
+      - m_Value: {x: 339.6587, y: 5.394, z: 157.36156}
         m_Name: Position
         m_Overridden: 1
       - m_Value: {x: 0, y: 0, z: 0}
@@ -354,7 +354,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ExecuteInEditor: 1
-  m_Bindings: []
+  m_Bindings:
+  - {fileID: 23668839}
+  - {fileID: 23668840}
   m_VisualEffect: {fileID: 23668837}
 --- !u!73398921 &23668842
 VFXRenderer:
@@ -363,7 +365,7 @@ VFXRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 23668836}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -687,7 +689,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boost: 3.5
-  positionLerpTime: 0.2
+  positionLerpTime: 1
   mouseSensitivityCurve:
     serializedVersion: 2
     m_Curve:
@@ -712,7 +714,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rotationLerpTime: 0.01
+  rotationLerpTime: 1
   invertY: 0
 --- !u!114 &531598551
 MonoBehaviour:
@@ -1127,6 +1129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lodTarget: {fileID: 531598549}
   resetAndRespawn: 0
+  continuousRespawn: 1
   followSceneCameraInEditor: 1
   volumeSize: 200
   forwardBiasDistance: 95
@@ -1134,8 +1137,8 @@ MonoBehaviour:
   vfx0:
     vfxPrefab: {fileID: 1990848220018708485, guid: f3b96dcdebecd8d43aa83286496d4930,
       type: 3}
-    volumeSize: 100
-    forwardBiasDistance: 45
+    volumeSize: 36
+    forwardBiasDistance: 17
     density: 18
   vfx1:
     vfxPrefab: {fileID: 8560407626912210306, guid: 57ce9118c7634834ea232a68b394cade,

@@ -73,9 +73,9 @@ public class TerrainVFXType
     // VFXEventAttribute eventAttr;
     Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
 
-    public void Update(TerrainVFXController controller, Terrain terrain, Transform lodTransform, bool resetAndRespawn)
+    public void Update(TerrainVFXController controller, TerrainMap terrainMap, Transform lodTransform, bool resetAndRespawn)
     {
-        if ((vfxPrefab == null) || (terrain == null))
+        if ((vfxPrefab == null) || (terrainMap == null))
             return;
 
         if (vfxObject == null)
@@ -107,9 +107,13 @@ public class TerrainVFXType
             liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
         }
 
-        if ((vfx != null) && (terrain != null))
+        if (vfx != null)
         {
-            // terrain.terrainData.alphamapTextures[0]
+            // TODO: really should do something akin to PaintContext to gather Terrains within the tiling volume
+            TerrainMap.TileCoord terrainCoord = terrainMap.GetTerrainCoord(tilingVolumeCenter);
+            Terrain terrain = terrainMap.GetTerrain(terrainCoord.tileX, terrainCoord.tileZ);
+            if (terrain == null)
+                return;
 
             vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
             vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
@@ -318,11 +322,14 @@ public class TerrainVFXController : MonoBehaviour
     // serialized settings and UI
     public Transform lodTarget;
     public bool resetAndRespawn;
+    public bool continuousRespawn;
     public bool followSceneCameraInEditor;
     public float volumeSize;
     public float forwardBiasDistance;
     public float density;
+    public int terrainGroupingID;       // TODO: or should we do a grouping id mask?
 
+    // TODO: this should be a list of vfx -- and it should just look at children to find the vfx elements...
     [SerializeField]
     public TerrainVFXType vfx0;
 
@@ -330,7 +337,7 @@ public class TerrainVFXController : MonoBehaviour
     public TerrainVFXType vfx1;
 
     // runtime state
-    Terrain terrain;
+    TerrainMap terrainMap;
 
     // Start is called before the first frame update
     void Start()
@@ -367,6 +374,34 @@ public class TerrainVFXController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // TODO: have to rebuild terrain map whenever the active terrain set changes
+        if (terrainMap == null)
+        {
+            // find a terrain with the correct grouping ID
+            Terrain originTerrain = null;
+            foreach (Terrain t in Terrain.activeTerrains)
+            {
+                if (t.groupingID == terrainGroupingID)
+                {
+                    originTerrain = t;
+                    break;
+                }
+            }
+
+            if (originTerrain)
+            {
+                terrainMap = TerrainMap.CreateFromPlacement(originTerrain, null, true);
+
+                if (terrainMap.m_errorCode != TerrainMap.ErrorCode.OK)
+                {
+                    terrainMap = null;
+                }
+            }
+        }
+
+        if (continuousRespawn)
+            resetAndRespawn = true;
+
         // compute tiling volume
         Transform lodTransform = lodTarget;
 #if UNITY_EDITOR
@@ -376,14 +411,14 @@ public class TerrainVFXController : MonoBehaviour
         }
 #endif
 
-        if (terrain == null)
-        {
-            terrain = GetComponent<Terrain>();
-        }
+//         if (terrain == null)
+//         {
+//             terrain = GetComponent<Terrain>();
+//         }
         TerrainVFXProperties.Setup();
 
-        vfx0.Update(this, terrain, lodTransform, resetAndRespawn);
-        vfx1.Update(this, terrain, lodTransform, resetAndRespawn);
+        vfx0.Update(this, terrainMap, lodTransform, resetAndRespawn);
+        vfx1.Update(this, terrainMap, lodTransform, resetAndRespawn);
         resetAndRespawn = false;
     }
 }

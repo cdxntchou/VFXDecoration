@@ -42,7 +42,7 @@ VisualEffect:
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: 2e1d4fec5136b6343b393717831c8766, type: 3}
   m_StartSeed: 0
-  m_ResetSeedOnPlay: 1
+  m_ResetSeedOnPlay: 0
   m_PropertySheet:
     m_Float:
       m_Array: []
@@ -52,8 +52,14 @@ VisualEffect:
       m_Array: []
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0, y: 0, z: 1, w: 1}
+      - m_Value: {x: 0, y: 0, z: 0.5, w: 0.5}
         m_Name: alphamapSize
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1, w: 1}
+        m_Name: alphamap_color2
+        m_Overridden: 1
+      - m_Value: {x: 0.1137255, y: 0.13601363, z: 0.5019608, w: 1}
+        m_Name: alphamap_color3
         m_Overridden: 1
     m_Uint:
       m_Array: []
