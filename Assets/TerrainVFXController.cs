@@ -15,19 +15,9 @@ public class TerrainVFXController : MonoBehaviour
     // serialized settings and UI
     public Transform lodTarget;
     public bool resetAndRespawn;
-    public bool continuousRespawn;
+    public bool continuousRespawnInEditor;
     public bool followSceneCameraInEditor;
-    public float volumeSize;
-    public float forwardBiasDistance;
-    public float density;
     public int terrainGroupingID;       // TODO: or should we do a grouping id mask?
-
-    // TODO: this should be a list of vfx -- and it should just look at children to find the vfx elements...
-    [SerializeField]
-    public TerrainVFXType vfx0;
-
-    [SerializeField]
-    public TerrainVFXType vfx1;
 
     // runtime state
     TerrainMap terrainMap;
@@ -109,8 +99,10 @@ public class TerrainVFXController : MonoBehaviour
             }
         }
 
-        if (continuousRespawn)
+#if UNITY_EDITOR
+        if (continuousRespawnInEditor && Application.isEditor && !Application.isPlaying)
             resetAndRespawn = true;
+#endif
 
         // compute tiling volume
         Transform lodTransform = lodTarget;
@@ -121,14 +113,7 @@ public class TerrainVFXController : MonoBehaviour
         }
 #endif
 
-//         if (terrain == null)
-//         {
-//             terrain = GetComponent<Terrain>();
-//         }
         TerrainVFXProperties.Setup();
-
-//         vfx0.Update(this, terrainMap, lodTransform, resetAndRespawn);
-//         vfx1.Update(this, terrainMap, lodTransform, resetAndRespawn);
 
         foreach(TerrainVFXState vfxState in vfxStates)
         {
