@@ -66,11 +66,27 @@ public class TerrainVFXState : MonoBehaviour
     public float volumeSize;
     public float forwardBiasDistance;
     public float density;
+    public bool debugLiveBounds;
 
     // runtime state
     VisualEffect vfx;
     // VFXEventAttribute eventAttr;
-    Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
+    // Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
+    Dictionary<Terrain, Rect> terrainLiveBounds;
+    Rect lastTargetBounds;
+
+
+    Rect ClipRect(Rect A, Rect B)
+    {
+        // TODO: probably have to fix this so that it has a hard clip and a soft clip bounds
+        // (ensuring the resulting Rect is always within the hard clip bounds)
+        return Rect.MinMaxRect(
+                Mathf.Max(A.xMin, B.xMin),
+                Mathf.Max(A.yMin, B.yMin),
+                Mathf.Min(A.xMax, B.xMax),
+                Mathf.Min(A.yMax, B.yMax)
+            );
+    }
 
     public void TerrainVFXUpdate(TerrainVFXController controller, TerrainMap terrainMap, Transform lodTransform, bool resetAndRespawn)
     {
@@ -80,11 +96,24 @@ public class TerrainVFXState : MonoBehaviour
         if (vfx == null)
         {
             vfx = GetComponent<VisualEffect>();
-            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
         }
-
         if (vfx == null)
             return;
+
+        if (terrainLiveBounds == null)
+        {
+            terrainLiveBounds = new Dictionary<Terrain, Rect>();
+            foreach (Terrain terrain in terrainMap.m_terrainTiles.Values)
+            {
+                terrainLiveBounds[terrain] =
+                    Rect.MinMaxRect(
+                        terrain.terrainData.bounds.min.x,
+                        terrain.terrainData.bounds.min.z,
+                        terrain.terrainData.bounds.max.x,
+                        terrain.terrainData.bounds.max.z);
+            }
+//             liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+        }
 
         Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
         Vector3 tilingVolumeSize = new Vector3(volumeSize, 2000.0f, volumeSize);
@@ -96,30 +125,8 @@ public class TerrainVFXState : MonoBehaviour
             tilingVolumeSize.x,
             tilingVolumeSize.z);
 
-        if (resetAndRespawn)
+        // always update render parameters
         {
-            vfx.Reinit();
-            liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
-        }
-
-        if (vfx != null)
-        {
-            // TODO: really should do something akin to PaintContext to gather Terrains within the tiling volume
-            TerrainMap.TileCoord terrainCoord = terrainMap.GetTerrainCoord(tilingVolumeCenter);
-            Terrain terrain = terrainMap.GetTerrain(terrainCoord.tileX, terrainCoord.tileZ);
-            if (terrain == null)
-                return;
-
-            vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
-            vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
-
-            Vector3 size = terrain.terrainData.size;
-            size.y *= 2.0f;     // faked because our heightmap is only [0-0.5]
-            vfx.SetVector3(TerrainVFXProperties.heightmapSize, size);
-
-            vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
-            // vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
-
             if (vfx.HasVector3(TerrainVFXProperties.lodTarget))
                 vfx.SetVector3(TerrainVFXProperties.lodTarget, tilingVolumeCenter);
 
@@ -128,28 +135,84 @@ public class TerrainVFXState : MonoBehaviour
 
             vfx.SetVector3(TerrainVFXProperties.fadeCenter, lodTransform.position);
             vfx.SetFloat(TerrainVFXProperties.fadeDistance, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
-
-            UpdateLiveBounds(targetBounds);
         }
+
+        // if the current target does not overlap with the previous target at all, then reset and respawn;
+        // because doing the incremental expansion algorithm is potentially much worse
+        if (!targetBounds.Overlaps(lastTargetBounds))
+        {
+            resetAndRespawn = true;
+        }
+
+        Rect clipBounds;
+        if (resetAndRespawn)
+        {
+            // clear all particles
+            vfx.Reinit();
+
+            // set live bounds to 0 area thin rect along the xMin edge (to minimize expansion steps)
+            clipBounds = Rect.MinMaxRect(targetBounds.xMin, targetBounds.yMin, targetBounds.xMin, targetBounds.yMax);
+        }
+        else
+        {
+            // cull particles against tiling volume
+            vfx.Simulate(0.0f, 1);
+            clipBounds = targetBounds;
+        }
+
+        // apply clipBounds
+        foreach (var terrainLiveBound in terrainLiveBounds)
+        {
+            Terrain terrain = terrainLiveBound.Key;
+            terrainLiveBounds[terrain] =
+                ClipRect(clipBounds, terrainLiveBound.Value);
+        }
+
+        // spawn towards target bounds
+        UpdateLiveBounds(targetBounds, terrainMap);
     }
 
-    void UpdateLiveBounds(Rect targetBounds)
+    class ExpansionCandidate
     {
-        // if the overlap region between live Bounds and newBounds is empty
-        // then we should just nuke and pave
-        // because doing the incremental expansion algorithm below is potentially much worse
-        // especially if the bounds have moved a long distance
-        if (!targetBounds.Overlaps(liveBounds))
+        Terrain terrain;
+        Rect spawnBounds;
+    }
+
+    void UpdateLiveBounds(Rect targetBounds, TerrainMap terrainMap)
+    {
+        // TODO: really should do something akin to PaintContext to gather Terrains within the tiling volume
+        TerrainMap.TileCoord minCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.min.x, 0.0f, targetBounds.min.y));
+        TerrainMap.TileCoord maxCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.max.x, 0.0f, targetBounds.max.y));
+
+        // TODO: need to track liveBounds per Terrain I think...
+        List<ExpansionCandidate> candidates = new List<ExpansionCandidate>();
+        for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
         {
-            vfx.Reinit();           // nuke
-            SpawnInRect(            // pave
-                targetBounds.xMin, targetBounds.xMax,
-                targetBounds.yMin, targetBounds.yMax);
-            liveBounds = targetBounds;
-            return;
+            for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
+            {
+                Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
+                if (terrain == null)
+                    continue;
+
+
+                SpawnOnTerrain();
+
+            }
         }
 
         // incremental update:
+
+        // setup properties for Terrain
+        vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
+        vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
+
+        Vector3 size = terrain.terrainData.size;
+        size.y *= 2.0f;     // faked because our heightmap is only [0-0.5]
+        vfx.SetVector3(TerrainVFXProperties.heightmapSize, size);
+
+        vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
+        // vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
+
 
         // first we calculate the clipped live bounds, to check what we should cull
         Rect clippedBounds = liveBounds;

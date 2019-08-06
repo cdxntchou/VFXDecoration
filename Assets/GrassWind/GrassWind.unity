@@ -1481,24 +1481,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lodTarget: {fileID: 531598549}
   resetAndRespawn: 0
-  continuousRespawn: 0
+  continuousRespawnInEditor: 0
   followSceneCameraInEditor: 1
-  volumeSize: 200
-  forwardBiasDistance: 95
-  density: 20
   terrainGroupingID: 0
-  vfx0:
-    vfxPrefab: {fileID: 1990848220018708485, guid: f3b96dcdebecd8d43aa83286496d4930,
-      type: 3}
-    volumeSize: 36
-    forwardBiasDistance: 17
-    density: 20
-  vfx1:
-    vfxPrefab: {fileID: 8560407626912210306, guid: 57ce9118c7634834ea232a68b394cade,
-      type: 3}
-    volumeSize: 200
-    forwardBiasDistance: 95
-    density: 20
 --- !u!4 &1441333913
 Transform:
   m_ObjectHideFlags: 0
@@ -1614,13 +1599,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 522.0558, y: 0, z: 230.15848}
+      - m_Value: {x: 449.50082, y: 0, z: 289.14716}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 322.05576, y: 0, z: 230.1405}
+      - m_Value: {x: 449.50076, y: 0, z: 89.147156}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 333.94614, y: 7.2306128, z: 157.52863}
+      - m_Value: {x: 286.06326, y: 13.599442, z: 118.51736}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1629,7 +1614,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 422.05576, y: -15.409381, z: 130.15848}
+      - m_Value: {x: 349.50082, y: 10.119926, z: 189.14716}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 200, y: 2000, z: 200}
@@ -1644,7 +1629,7 @@ VisualEffect:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 72
+      - m_Value: 1
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1699,13 +1684,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 367.71313, y: 0, z: 170.63081}
+      - m_Value: {x: 315.41464, y: 0, z: 149.15613}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 331.71313, y: 0, z: 170.6276}
+      - m_Value: {x: 279.41504, y: 0, z: 149.15489}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 333.94614, y: 7.2306128, z: 157.52863}
+      - m_Value: {x: 286.06326, y: 13.599442, z: 118.51736}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1714,7 +1699,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 349.71313, y: 3.1792455, z: 152.63081}
+      - m_Value: {x: 297.41525, y: 12.976791, z: 131.15637}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 36, y: 2000, z: 36}
@@ -1735,7 +1720,7 @@ VisualEffect:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 2
+      - m_Value: 1
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
