@@ -17,6 +17,8 @@ public class TerrainVFXController : MonoBehaviour
     public bool resetAndRespawn;
     public bool continuousRespawnInEditor;
     public bool followSceneCameraInEditor;
+    public bool tick;
+    public bool alwaysTick;
     public int terrainGroupingID;       // TODO: or should we do a grouping id mask?
 
     // runtime state
@@ -115,9 +117,13 @@ public class TerrainVFXController : MonoBehaviour
 
         TerrainVFXProperties.Setup();
 
-        foreach(TerrainVFXState vfxState in vfxStates)
+        if (tick || alwaysTick)
         {
-            vfxState.TerrainVFXUpdate(this, terrainMap, lodTransform, resetAndRespawn);
+            foreach (TerrainVFXState vfxState in vfxStates)
+            {
+                vfxState.TerrainVFXUpdate(this, terrainMap, lodTransform, resetAndRespawn);
+            }
+            tick = false;
         }
         resetAndRespawn = false;
     }
