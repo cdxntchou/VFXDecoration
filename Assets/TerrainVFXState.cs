@@ -76,6 +76,35 @@ public class TerrainVFXState : MonoBehaviour
     Dictionary<Terrain, Rect> terrainLiveBounds;
     Rect lastTargetBounds;
 
+#if UNITY_EDITOR
+    void OnEnable()
+    {
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    void OnDisable()
+    {
+        SceneView.duringSceneGui -= OnSceneGUI;
+    }
+    void OnSceneGUI(SceneView sv)
+    {
+        //Draw your handles here
+        if (debugLiveBounds && (terrainLiveBounds != null))
+        {
+            Vector3[] points = new Vector3[4];
+            foreach (Rect liveBounds in terrainLiveBounds.Values)
+            {
+                points[0] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.min.y);
+                points[1] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.max.y);
+                points[2] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.max.y);
+                points[3] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.min.y);
+                Handles.color = new Color(1.0f, 0.0f, 0.0f);
+                Handles.DrawAAPolyLine(2.0f, points);
+            }
+        }
+    }
+#endif
+
 
     static Rect ClipRect(Rect A, Rect B)
     {
@@ -183,20 +212,6 @@ public class TerrainVFXState : MonoBehaviour
 
         // spawn towards target bounds
         UpdateLiveBounds(targetBounds, terrainMap);
-
-        if (debugLiveBounds)
-        {
-            Vector3[] points = new Vector3[4];
-            foreach (Rect liveBounds in terrainLiveBounds.Values)
-            {
-                points[0] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.min.y);
-                points[1] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.max.y);
-                points[2] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.max.y);
-                points[3] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.min.y);
-                Handles.color = new Color(1.0f, 0.0f, 0.0f);
-                Handles.DrawAAPolyLine(2.0f, points);
-            }
-        }
     }
 
     struct ExpansionCandidate
