@@ -60,6 +60,7 @@ internal static class TerrainVFXProperties
 
 // TODO: this doesn't have to be a MonoBehaviour, other than we want to attach it to the same game object that is running the VisualEffect
 // We could merge this with VisualEffect in the future, to make one component type "TerrainVisualEffect" ?
+[ExecuteInEditMode]
 public class TerrainVFXState : MonoBehaviour
 {
     // serialized settings
@@ -76,7 +77,7 @@ public class TerrainVFXState : MonoBehaviour
     Rect lastTargetBounds;
 
 
-    Rect ClipRect(Rect A, Rect B)
+    static Rect ClipRect(Rect A, Rect B)
     {
         // TODO: probably have to fix this so that it has a hard clip and a soft clip bounds
         // (ensuring the resulting Rect is always within the hard clip bounds)
@@ -85,6 +86,16 @@ public class TerrainVFXState : MonoBehaviour
                 Mathf.Max(A.yMin, B.yMin),
                 Mathf.Min(A.xMax, B.xMax),
                 Mathf.Min(A.yMax, B.yMax)
+            );
+    }
+
+    static Rect ExpandRect(Rect A, Rect B)
+    {
+        return Rect.MinMaxRect(
+                Mathf.Min(A.xMin, B.xMin),
+                Mathf.Min(A.yMin, B.yMin),
+                Mathf.Max(A.xMax, B.xMax),
+                Mathf.Max(A.yMax, B.yMax)
             );
     }
 
@@ -103,6 +114,8 @@ public class TerrainVFXState : MonoBehaviour
         if (terrainLiveBounds == null)
         {
             terrainLiveBounds = new Dictionary<Terrain, Rect>();
+
+            // initialize live bounds
             foreach (Terrain terrain in terrainMap.m_terrainTiles.Values)
             {
                 terrainLiveBounds[terrain] =
@@ -112,7 +125,6 @@ public class TerrainVFXState : MonoBehaviour
                         terrain.terrainData.bounds.max.x,
                         terrain.terrainData.bounds.max.z);
             }
-//             liveBounds = Rect.MinMaxRect(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
         }
 
         Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
@@ -143,6 +155,7 @@ public class TerrainVFXState : MonoBehaviour
         {
             resetAndRespawn = true;
         }
+        lastTargetBounds = targetBounds;
 
         Rect clipBounds;
         if (resetAndRespawn)
@@ -170,12 +183,27 @@ public class TerrainVFXState : MonoBehaviour
 
         // spawn towards target bounds
         UpdateLiveBounds(targetBounds, terrainMap);
+
+        if (debugLiveBounds)
+        {
+            Vector3[] points = new Vector3[4];
+            foreach (Rect liveBounds in terrainLiveBounds.Values)
+            {
+                points[0] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.min.y);
+                points[1] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.max.y);
+                points[2] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.max.y);
+                points[3] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.min.y);
+                Handles.color = new Color(1.0f, 0.0f, 0.0f);
+                Handles.DrawAAPolyLine(2.0f, points);
+            }
+        }
     }
 
-    class ExpansionCandidate
+    struct ExpansionCandidate
     {
-        Terrain terrain;
-        Rect spawnBounds;
+        public float spawnArea;
+        public Terrain terrain;
+        public Rect spawnBounds;
     }
 
     void UpdateLiveBounds(Rect targetBounds, TerrainMap terrainMap)
@@ -184,8 +212,12 @@ public class TerrainVFXState : MonoBehaviour
         TerrainMap.TileCoord minCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.min.x, 0.0f, targetBounds.min.y));
         TerrainMap.TileCoord maxCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.max.x, 0.0f, targetBounds.max.y));
 
-        // TODO: need to track liveBounds per Terrain I think...
-        List<ExpansionCandidate> candidates = new List<ExpansionCandidate>();
+        // expansion algorithm incrementally tries to fill the targetBounds rectangle by expanding the liveBounds area
+        // since we can only do one spawn per frame, we find the best expansion candidate to do immediately
+        ExpansionCandidate bestCandidate;
+        bestCandidate.spawnArea = 0.0f;
+        bestCandidate.terrain = null;
+        bestCandidate.spawnBounds = Rect.zero;
         for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
         {
             for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
@@ -193,15 +225,34 @@ public class TerrainVFXState : MonoBehaviour
                 Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
                 if (terrain == null)
                     continue;
+                Rect liveBounds = terrainLiveBounds[terrain];
 
+                // calculate expansion
 
-                SpawnOnTerrain();
-
+                Rect spawnBounds = CalculateBestSpawnBounds(liveBounds, targetBounds);
+                if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
+                {
+                    float spawnArea = spawnBounds.width * spawnBounds.height;
+                    if (spawnArea > bestCandidate.spawnArea)
+                    {
+                        bestCandidate.spawnArea = spawnArea;
+                        bestCandidate.terrain = terrain;
+                        bestCandidate.spawnBounds = spawnBounds;
+                    }
+                }
             }
         }
 
-        // incremental update:
+        if (bestCandidate.spawnArea > 0.0f)
+        {
+            SpawnInRect(bestCandidate.terrain, bestCandidate.spawnBounds);
+            terrainLiveBounds[bestCandidate.terrain] =
+                ExpandRect(terrainLiveBounds[bestCandidate.terrain], bestCandidate.spawnBounds);
+        }
+    }
 
+    void SpawnInRect(Terrain terrain, Rect spawnBounds)
+    {
         // setup properties for Terrain
         vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
         vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
@@ -213,86 +264,11 @@ public class TerrainVFXState : MonoBehaviour
         vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
         // vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
 
-
-        // first we calculate the clipped live bounds, to check what we should cull
-        Rect clippedBounds = liveBounds;
-        clippedBounds.xMin = Mathf.Max(clippedBounds.xMin, targetBounds.xMin);
-        clippedBounds.xMax = Mathf.Min(clippedBounds.xMax, targetBounds.xMax);
-        clippedBounds.yMin = Mathf.Max(clippedBounds.yMin, targetBounds.yMin);
-        clippedBounds.yMax = Mathf.Min(clippedBounds.yMax, targetBounds.yMax);
-        //         float clippedWidth = Mathf.Max(clippedBounds.xMax - clippedBounds.xMin, 0.0f);
-        //         float clippedHeight = Mathf.Max(clippedBounds.yMax - clippedBounds.yMin, 0.0f);
-        //         float clippedArea = clippedWidth * clippedHeight;
-
-        // if clipping results in a significantly reduced area
-        //         float liveArea = liveBounds.width * liveBounds.height;
-        // if (clippedArea < 0.90f * liveArea)                      // BUG: not sure why, but if I skip the cull here, it drops particle spawns below
+        if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
         {
-            // first do a culling pass against the new tiling area to free up particles
-            vfx.Simulate(0.0f, 1);
-            liveBounds = clippedBounds;
-        }
-
-        // assuming we can only do one spawn event, figure out the best border to spawn along...
-        float xMinDelta = liveBounds.xMin - targetBounds.xMin;
-        float xMaxDelta = targetBounds.xMax - liveBounds.xMax;
-        float yMinDelta = liveBounds.yMin - targetBounds.yMin;
-        float yMaxDelta = targetBounds.yMax - liveBounds.yMax;
-        float xDelta = Mathf.Max(xMinDelta, xMaxDelta);
-        float yDelta = Mathf.Max(yMinDelta, yMaxDelta);
-        float delta = Mathf.Max(xDelta, yDelta);
-
-        if (delta > 0.0f)
-        {
-            Rect spawnBounds = targetBounds;
-            if (xDelta > yDelta)
-            {
-                // spawn along x -- first trim along y
-                liveBounds.yMin = Mathf.Max(liveBounds.yMin, spawnBounds.yMin);
-                liveBounds.yMax = Mathf.Min(liveBounds.yMax, spawnBounds.yMax);
-                if (xMinDelta > xMaxDelta)
-                {
-                    // spawn along xMin, and last.xMin to indicate we covered it
-                    SpawnInRect(
-                        spawnBounds.xMin, liveBounds.xMin,
-                        liveBounds.yMin, liveBounds.yMax);
-
-                    liveBounds.xMin = spawnBounds.xMin;
-                }
-                else
-                {
-                    // spawn along xMax, and last.xMax to indicate we covered it
-                    SpawnInRect(
-                        liveBounds.xMax, spawnBounds.xMax,
-                        liveBounds.yMin, liveBounds.yMax);
-
-                    liveBounds.xMax = spawnBounds.xMax;
-                }
-            }
-            else
-            {
-                // spawn along y -- first trim along x
-                liveBounds.xMin = Mathf.Max(liveBounds.xMin, spawnBounds.xMin);
-                liveBounds.xMax = Mathf.Min(liveBounds.xMax, spawnBounds.xMax);
-                if (yMinDelta > yMaxDelta)
-                {
-                    // spawn along yMin, and last.yMin to indicate we covered it
-                    SpawnInRect(
-                        liveBounds.xMin, liveBounds.xMax,
-                        spawnBounds.yMin, liveBounds.yMin);
-
-                    liveBounds.yMin = spawnBounds.yMin;
-                }
-                else
-                {
-                    // spawn along yMax, and last.yMax to indicate we covered it
-                    SpawnInRect(
-                        liveBounds.xMin, liveBounds.xMax,
-                        liveBounds.yMax, spawnBounds.yMax);
-
-                    liveBounds.yMax = spawnBounds.yMax;
-                }
-            }
+            SpawnInRect(
+                spawnBounds.xMin, spawnBounds.xMax,
+                spawnBounds.yMin, spawnBounds.yMax);
         }
 
         /* // This was the first algorithm I tried...  it requires more than one event per frame
@@ -341,6 +317,68 @@ public class TerrainVFXState : MonoBehaviour
                 lastBounds = newBounds;
         */
     }
+
+    // incremental update -- calculate next bounds to spawn in
+    Rect CalculateBestSpawnBounds(Rect liveBounds, Rect targetBounds)
+    {
+        // default is empty
+        Rect spawnBounds = new Rect(liveBounds.min, Vector2.zero);
+
+        // assuming we can only do one spawn event, figure out the best border to spawn along...
+        float xMinDelta = liveBounds.xMin - targetBounds.xMin;
+        float xMaxDelta = targetBounds.xMax - liveBounds.xMax;
+        float yMinDelta = liveBounds.yMin - targetBounds.yMin;
+        float yMaxDelta = targetBounds.yMax - liveBounds.yMax;
+        float xDelta = Mathf.Max(xMinDelta, xMaxDelta);
+        float yDelta = Mathf.Max(yMinDelta, yMaxDelta);
+        float delta = Mathf.Max(xDelta, yDelta);
+
+        if (delta > 0.0f)
+        {
+            if (xDelta > yDelta)
+            {
+                // spawn along x -- first trim live bounds along y
+                liveBounds.yMin = Mathf.Max(liveBounds.yMin, targetBounds.yMin);
+                liveBounds.yMax = Mathf.Min(liveBounds.yMax, targetBounds.yMax);
+                if (xMinDelta > xMaxDelta)
+                {
+                    // spawn along xMin, and last.xMin to indicate we covered it
+                    spawnBounds = Rect.MinMaxRect(
+                        targetBounds.xMin, liveBounds.yMin,
+                        liveBounds.xMin, liveBounds.yMax);
+                }
+                else
+                {
+                    // spawn along xMax, and last.xMax to indicate we covered it
+                    spawnBounds = Rect.MinMaxRect(
+                        liveBounds.xMax, liveBounds.yMin,
+                        targetBounds.xMax, liveBounds.yMax);
+                }
+            }
+            else
+            {
+                // spawn along y -- first trim along x
+                liveBounds.xMin = Mathf.Max(liveBounds.xMin, targetBounds.xMin);
+                liveBounds.xMax = Mathf.Min(liveBounds.xMax, targetBounds.xMax);
+                if (yMinDelta > yMaxDelta)
+                {
+                    // spawn along yMin, and last.yMin to indicate we covered it
+                    spawnBounds = Rect.MinMaxRect(
+                        liveBounds.xMin, targetBounds.yMin,
+                        liveBounds.xMax, liveBounds.yMin);
+                }
+                else
+                {
+                    // spawn along yMax, and last.yMax to indicate we covered it
+                    spawnBounds = Rect.MinMaxRect(
+                        liveBounds.xMin, liveBounds.yMax,
+                        liveBounds.xMax, targetBounds.yMax);
+                }
+            }
+        }
+        return spawnBounds;
+    }
+
 
     void SpawnInRect(
         float minX, float maxX,
