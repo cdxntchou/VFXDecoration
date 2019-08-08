@@ -58,6 +58,13 @@ internal static class TerrainVFXProperties
 }
 
 
+public class TerrainState
+{
+//    public Rect liveBounds;
+    public Rect terrainBounds;
+}
+
+
 // TODO: this doesn't have to be a MonoBehaviour, other than we want to attach it to the same game object that is running the VisualEffect
 // We could merge this with VisualEffect in the future, to make one component type "TerrainVisualEffect" ?
 [ExecuteInEditMode]
@@ -73,8 +80,11 @@ public class TerrainVFXState : MonoBehaviour
     VisualEffect vfx;
     // VFXEventAttribute eventAttr;
     // Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
-    Dictionary<Terrain, Rect> terrainLiveBounds;
-    Rect lastTargetBounds;
+
+    Dictionary<Terrain, TerrainState> terrainStates;
+    Rect liveBounds;
+//    Rect lastTargetBounds;
+
 
 #if UNITY_EDITOR
     void OnEnable()
@@ -89,18 +99,32 @@ public class TerrainVFXState : MonoBehaviour
     void OnSceneGUI(SceneView sv)
     {
         //Draw your handles here
-        if (debugLiveBounds && (terrainLiveBounds != null))
+        if (debugLiveBounds)
         {
-            Vector3[] points = new Vector3[4];
-            foreach (Rect liveBounds in terrainLiveBounds.Values)
-            {
-                points[0] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.min.y);
-                points[1] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.max.y);
-                points[2] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.max.y);
-                points[3] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.min.y);
-                Handles.color = new Color(1.0f, 0.0f, 0.0f);
-                Handles.DrawAAPolyLine(2.0f, points);
-            }
+            Vector3[] points = new Vector3[5];
+
+            if (terrainStates != null)
+                foreach (TerrainState terrainState in terrainStates.Values)
+                {
+                    // Rect liveBounds = terrainState.liveBounds;
+                    Rect terrainBounds = terrainState.terrainBounds;
+
+                    points[0] = new Vector3(terrainBounds.min.x, 0.0f, terrainBounds.min.y);
+                    points[1] = new Vector3(terrainBounds.min.x, 0.0f, terrainBounds.max.y);
+                    points[2] = new Vector3(terrainBounds.max.x, 0.0f, terrainBounds.max.y);
+                    points[3] = new Vector3(terrainBounds.max.x, 0.0f, terrainBounds.min.y);
+                    points[4] = points[0];
+                    Handles.color = new Color(0.0f, 1.0f, 0.0f);
+                    Handles.DrawAAPolyLine(4.0f, points);
+                }
+
+            points[0] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.min.y);
+            points[1] = new Vector3(liveBounds.min.x, 0.0f, liveBounds.max.y);
+            points[2] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.max.y);
+            points[3] = new Vector3(liveBounds.max.x, 0.0f, liveBounds.min.y);
+            points[4] = points[0];
+            Handles.color = new Color(1.0f, UnityEngine.Random.value, UnityEngine.Random.value);
+            Handles.DrawAAPolyLine(2.0f, points);
         }
     }
 #endif
@@ -136,23 +160,25 @@ public class TerrainVFXState : MonoBehaviour
         if (vfx == null)
         {
             vfx = GetComponent<VisualEffect>();
+            resetAndRespawn = true;
         }
         if (vfx == null)
             return;
 
-        if (terrainLiveBounds == null)
+        if (terrainStates == null)
         {
-            terrainLiveBounds = new Dictionary<Terrain, Rect>();
+            terrainStates = new Dictionary<Terrain, TerrainState>();
 
             // initialize live bounds
             foreach (Terrain terrain in terrainMap.m_terrainTiles.Values)
             {
-                terrainLiveBounds[terrain] =
-                    Rect.MinMaxRect(
-                        terrain.terrainData.bounds.min.x,
-                        terrain.terrainData.bounds.min.z,
-                        terrain.terrainData.bounds.max.x,
-                        terrain.terrainData.bounds.max.z);
+                terrainStates[terrain] =
+                    new TerrainState()
+                    {
+                        terrainBounds = new Rect(
+                            terrain.transform.position.x, terrain.transform.position.z,
+                            terrain.terrainData.size.x, terrain.terrainData.size.z)
+                    };
             }
         }
 
@@ -180,46 +206,36 @@ public class TerrainVFXState : MonoBehaviour
 
         // if the current target does not overlap with the previous target at all, then reset and respawn;
         // because doing the incremental expansion algorithm is potentially much worse
-        if (!targetBounds.Overlaps(lastTargetBounds))
+        if (!targetBounds.Overlaps(liveBounds))
         {
             resetAndRespawn = true;
         }
-        lastTargetBounds = targetBounds;
 
-        Rect clipBounds;
         if (resetAndRespawn)
         {
             // clear all particles
             vfx.Reinit();
 
             // set live bounds to 0 area thin rect along the xMin edge (to minimize expansion steps)
-            clipBounds = Rect.MinMaxRect(targetBounds.xMin, targetBounds.yMin, targetBounds.xMin, targetBounds.yMax);
+            liveBounds = Rect.MinMaxRect(targetBounds.xMin, targetBounds.yMin, targetBounds.xMin, targetBounds.yMax);
         }
         else
         {
             // cull particles against tiling volume
             vfx.Simulate(0.0f, 1);
-            clipBounds = targetBounds;
-        }
-
-        // apply clipBounds
-        foreach (var terrainLiveBound in terrainLiveBounds)
-        {
-            Terrain terrain = terrainLiveBound.Key;
-            terrainLiveBounds[terrain] =
-                ClipRect(clipBounds, terrainLiveBound.Value);
+            liveBounds = ClipRect(liveBounds, targetBounds);
         }
 
         // spawn towards target bounds
         UpdateLiveBounds(targetBounds, terrainMap);
     }
 
-    struct ExpansionCandidate
-    {
-        public float spawnArea;
-        public Terrain terrain;
-        public Rect spawnBounds;
-    }
+//     struct ExpansionCandidate
+//     {
+//         public float spawnArea;
+//         public Terrain terrain;
+//         public Rect spawnBounds;
+//     }
 
     void UpdateLiveBounds(Rect targetBounds, TerrainMap terrainMap)
     {
@@ -227,42 +243,32 @@ public class TerrainVFXState : MonoBehaviour
         TerrainMap.TileCoord minCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.min.x, 0.0f, targetBounds.min.y));
         TerrainMap.TileCoord maxCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.max.x, 0.0f, targetBounds.max.y));
 
-        // expansion algorithm incrementally tries to fill the targetBounds rectangle by expanding the liveBounds area
-        // since we can only do one spawn per frame, we find the best expansion candidate to do immediately
-        ExpansionCandidate bestCandidate;
-        bestCandidate.spawnArea = 0.0f;
-        bestCandidate.terrain = null;
-        bestCandidate.spawnBounds = Rect.zero;
-        for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
+        // calculate the spawn bounds for the best expansion direction for live bounds
+        Rect spawnBounds = CalculateBestSpawnBounds(liveBounds, targetBounds);
+
+        // spawn in spawn bounds across all relevant terrain tiles
+        if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
         {
-            for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
+            for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
             {
-                Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
-                if (terrain == null)
-                    continue;
-                Rect liveBounds = terrainLiveBounds[terrain];
-
-                // calculate expansion
-
-                Rect spawnBounds = CalculateBestSpawnBounds(liveBounds, targetBounds);
-                if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
+                for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
                 {
-                    float spawnArea = spawnBounds.width * spawnBounds.height;
-                    if (spawnArea > bestCandidate.spawnArea)
+                    Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
+                    if (terrain == null)
+                        continue;
+                    TerrainState terrainState = terrainStates[terrain];
+
+                    // clip spawnBounds to the terrain tile
+                    Rect terrainSpawnBounds = ClipRect(spawnBounds, terrainState.terrainBounds);
+
+                    float spawnArea = terrainSpawnBounds.width * terrainSpawnBounds.height;
+                    if (spawnArea > 0.0f)
                     {
-                        bestCandidate.spawnArea = spawnArea;
-                        bestCandidate.terrain = terrain;
-                        bestCandidate.spawnBounds = spawnBounds;
+                        SpawnInRect(terrain, terrainSpawnBounds);
                     }
                 }
             }
-        }
-
-        if (bestCandidate.spawnArea > 0.0f)
-        {
-            SpawnInRect(bestCandidate.terrain, bestCandidate.spawnBounds);
-            terrainLiveBounds[bestCandidate.terrain] =
-                ExpandRect(terrainLiveBounds[bestCandidate.terrain], bestCandidate.spawnBounds);
+            liveBounds = ExpandRect(liveBounds, spawnBounds);
         }
     }
 
