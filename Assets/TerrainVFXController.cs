@@ -42,6 +42,7 @@ public class TerrainVFXController : MonoBehaviour
     // runtime state
     TerrainMap terrainMap;
     TerrainVFXState[] vfxStates;
+    bool undoClear;
 
     // Start is called before the first frame update
     void Start()
@@ -55,9 +56,9 @@ public class TerrainVFXController : MonoBehaviour
         TerrainVFXProperties.Reset();
         TerrainCallbacks.heightmapChanged += TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged += TerrainTextureChangedCallback;
-// #if UNITY_EDITOR         // this isn't working
-//         Undo.undoRedoPerformed += TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
-// #endif // UNITY_EDITOR
+//#if UNITY_EDITOR         // this isn't working
+        Undo.undoRedoPerformed += TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
+//#endif // UNITY_EDITOR
         resetAndRespawn = true;
     }
     private void OnDisable()
@@ -65,9 +66,9 @@ public class TerrainVFXController : MonoBehaviour
         TerrainVFXProperties.Reset();
         TerrainCallbacks.heightmapChanged -= TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged -= TerrainTextureChangedCallback;
-// #if UNITY_EDITOR
-//         Undo.undoRedoPerformed -= TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
-// #endif // UNITY_EDITOR
+//#if UNITY_EDITOR
+        Undo.undoRedoPerformed -= TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
+//#endif // UNITY_EDITOR
         resetAndRespawn = true;
     }
 
@@ -81,11 +82,10 @@ public class TerrainVFXController : MonoBehaviour
         resetAndRespawn = true;
     }
 
-//     void TerrainUndoCallback()
-//     {
-//         Debug.Log("Undo Reset");
-//         resetAndRespawn = true;
-//     }
+    void TerrainUndoCallback()
+    {
+        undoClear = true;
+    }
 
     // Update is called once per frame
     void Update()
@@ -143,13 +143,18 @@ public class TerrainVFXController : MonoBehaviour
         {
             lodTransform = SceneView.lastActiveSceneView.camera.transform;
         }
-
-        int undoGroup = Undo.GetCurrentGroup();
-        if (undoGroup != lastUndoGroup)
+        if (undoClear)
         {
             resetAndRespawn = true;
+            undoClear = false;
         }
-        lastUndoGroup = undoGroup;
+
+        //         int undoGroup = Undo.GetCurrentGroup();
+        //         if (undoGroup != lastUndoGroup)
+        //         {
+        //             resetAndRespawn = true;
+        //         }
+        //         lastUndoGroup = undoGroup;
 #endif
 
         TerrainVFXProperties.Setup();
