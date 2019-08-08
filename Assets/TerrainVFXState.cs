@@ -78,13 +78,18 @@ public class TerrainVFXState : MonoBehaviour
 
     // runtime state
     VisualEffect vfx;
-    // VFXEventAttribute eventAttr;
-    // Rect liveBounds;                // describes the area that is currently fully populated with spawned particles
-
     Dictionary<Terrain, TerrainState> terrainStates;
     Rect liveBounds;
-//    Rect lastTargetBounds;
 
+
+    // stupid amortized spawn state:  (HACK around not being able to send multiple events in a single frame)
+    bool isSpawning;
+    Rect spawnBounds;
+    TerrainMap terrainMap;
+    TerrainMap.TileCoord minCoord;
+    TerrainMap.TileCoord maxCoord;
+    int tileZ;
+    int tileX;
 
 #if UNITY_EDITOR
     void OnEnable()
@@ -204,6 +209,13 @@ public class TerrainVFXState : MonoBehaviour
             vfx.SetFloat(TerrainVFXProperties.fadeDistance, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
         }
 
+        if (isSpawning)
+        {
+            RunSpawnStep();
+            return;
+        }
+        // else start spawn step below
+
         // if the current target does not overlap with the previous target at all, then reset and respawn;
         // because doing the incremental expansion algorithm is potentially much worse
         if (!targetBounds.Overlaps(liveBounds))
@@ -230,45 +242,80 @@ public class TerrainVFXState : MonoBehaviour
         UpdateLiveBounds(targetBounds, terrainMap);
     }
 
-//     struct ExpansionCandidate
-//     {
-//         public float spawnArea;
-//         public Terrain terrain;
-//         public Rect spawnBounds;
-//     }
-
     void UpdateLiveBounds(Rect targetBounds, TerrainMap terrainMap)
     {
         // TODO: really should do something akin to PaintContext to gather Terrains within the tiling volume
-        TerrainMap.TileCoord minCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.min.x, 0.0f, targetBounds.min.y));
-        TerrainMap.TileCoord maxCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.max.x, 0.0f, targetBounds.max.y));
+        minCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.min.x, 0.0f, targetBounds.min.y));
+        maxCoord = terrainMap.GetTerrainCoord(new Vector3(targetBounds.max.x, 0.0f, targetBounds.max.y));
 
         // calculate the spawn bounds for the best expansion direction for live bounds
-        Rect spawnBounds = CalculateBestSpawnBounds(liveBounds, targetBounds);
+        spawnBounds = CalculateBestSpawnBounds(liveBounds, targetBounds);
 
         // spawn in spawn bounds across all relevant terrain tiles
         if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
         {
-            for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
+            this.terrainMap = terrainMap;
+            this.tileZ = minCoord.tileZ;
+            this.tileX = minCoord.tileX;
+            this.isSpawning = true;
+            RunSpawnStep();
+
+//             for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
+//             {
+//                 for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
+//                 {
+//                     Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
+//                     if (terrain == null)
+//                         continue;
+//                     TerrainState terrainState = terrainStates[terrain];
+// 
+//                     // clip spawnBounds to the terrain tile
+//                     Rect terrainSpawnBounds = ClipRect(spawnBounds, terrainState.terrainBounds);
+// 
+//                     float spawnArea = terrainSpawnBounds.width * terrainSpawnBounds.height;
+//                     if (spawnArea > 0.0f)
+//                     {
+//                         SpawnInRect(terrain, terrainSpawnBounds);
+//                     }
+//                 }
+//             }
+            liveBounds = ExpandRect(liveBounds, spawnBounds);
+        }
+    }
+
+    void RunSpawnStep()
+    {
+        while(isSpawning)
+        {
+            Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
+
+            // advance coord to next tile
+            tileX++;
+            if (tileX > maxCoord.tileX)
             {
-                for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
+                tileX = minCoord.tileX;
+                tileZ++;
+                if (tileZ > maxCoord.tileZ)
+                    isSpawning = false;
+            }
+
+            if (terrain != null)
+            {
+                TerrainState terrainState = terrainStates[terrain];
+
+                // clip spawnBounds to the terrain tile
+                Rect terrainSpawnBounds = ClipRect(spawnBounds, terrainState.terrainBounds);
+
+                float spawnArea = terrainSpawnBounds.width * terrainSpawnBounds.height;
+                if (spawnArea > 0.0f)
                 {
-                    Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
-                    if (terrain == null)
-                        continue;
-                    TerrainState terrainState = terrainStates[terrain];
-
-                    // clip spawnBounds to the terrain tile
-                    Rect terrainSpawnBounds = ClipRect(spawnBounds, terrainState.terrainBounds);
-
-                    float spawnArea = terrainSpawnBounds.width * terrainSpawnBounds.height;
-                    if (spawnArea > 0.0f)
-                    {
-                        SpawnInRect(terrain, terrainSpawnBounds);
-                    }
+                    SpawnInRect(terrain, terrainSpawnBounds);
+                    return;
                 }
             }
-            liveBounds = ExpandRect(liveBounds, spawnBounds);
+
+            // otherwise we didn't spawn anything yet
+            // so go to the next terrain tile
         }
     }
 
@@ -426,14 +473,14 @@ public class TerrainVFXState : MonoBehaviour
                 vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
 
                 vfx.SendEvent("CreateInBounds", null);
-                // vfx.Simulate(0.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
+                vfx.Simulate(1.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
             }
         }
     }
 }
 
 
-
+/*
 [Serializable]
 public class TerrainVFXType
 {
@@ -612,52 +659,6 @@ public class TerrainVFXType
                 }
             }
         }
-
-        /* // This was the first algorithm I tried...  it requires more than one event per frame
-
-                // first spawn along +/- X border
-                if (spawnBounds.xMin < lastBounds.xMin)
-                {
-                    // spawn between spawn.xMin and last.xMin
-                    SpawnInRect(
-                        eventAttr,
-                        spawnBounds.xMin, lastBounds.xMin,
-                        spawnBounds.yMin, spawnBounds.yMax);
-
-                    // clip away the spawned region from the spawnBounds
-                    spawnBounds.xMin = lastBounds.xMin;
-                }
-                if (spawnBounds.xMax > lastBounds.xMax)
-                {
-                    // spawn between last.xMax and spawn.xMax
-                    SpawnInRect(
-                        eventAttr2,
-                        lastBounds.xMax, spawnBounds.xMax,
-                        spawnBounds.yMin, spawnBounds.yMax);
-
-                    // clip away the spawned region from the spawnBounds
-                    spawnBounds.xMax = lastBounds.xMax;
-                }
-
-                // spawn along +/- Y border
-                if (spawnBounds.yMin < lastBounds.yMin)
-                {
-                    // spawn between spawn.yMin and last.yMin
-                    SpawnInRect(
-                        eventAttr3,
-                        spawnBounds.xMin, spawnBounds.xMax,
-                        spawnBounds.yMin, lastBounds.yMin, 2);
-                }
-                if (spawnBounds.yMax > lastBounds.yMax)
-                {
-                    // spawn between last.yMax and spawn.yMax
-                    SpawnInRect(
-                        eventAttr4,
-                        spawnBounds.xMin, spawnBounds.xMax,
-                        lastBounds.yMax, spawnBounds.yMax, 2);
-                }
-                lastBounds = newBounds;
-        */
     }
 
     void SpawnInRect(
@@ -690,3 +691,4 @@ public class TerrainVFXType
         }
     }
 };
+*/
