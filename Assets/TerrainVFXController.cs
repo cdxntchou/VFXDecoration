@@ -9,6 +9,23 @@ using UnityEditor;
 #endif
 
 
+#if UNITY_EDITOR
+// hack -- VFX systems are reset on save, so we need some way to force them to respawn
+public class FileModificationWarning : UnityEditor.AssetModificationProcessor
+{
+    static string[] OnWillSaveAssets(string[] paths)
+    {
+        UnityEngine.Object[] controllers = UnityEngine.Object.FindObjectsOfType<TerrainVFXController>();
+        foreach (var controller in controllers)
+        {
+            TerrainVFXController vfxController = controller as TerrainVFXController;
+            vfxController.resetAndRespawn = true;
+        }
+        return paths;
+    }
+}
+#endif // UNITY_EDITOR
+
 [ExecuteInEditMode]
 public class TerrainVFXController : MonoBehaviour
 {
@@ -20,6 +37,7 @@ public class TerrainVFXController : MonoBehaviour
     public bool tick;
     public bool alwaysTick;
     public int terrainGroupingID;       // TODO: or should we do a grouping id mask?
+    public int lastUndoGroup;
 
     // runtime state
     TerrainMap terrainMap;
@@ -37,6 +55,9 @@ public class TerrainVFXController : MonoBehaviour
         TerrainVFXProperties.Reset();
         TerrainCallbacks.heightmapChanged += TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged += TerrainTextureChangedCallback;
+// #if UNITY_EDITOR         // this isn't working
+//         Undo.undoRedoPerformed += TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
+// #endif // UNITY_EDITOR
         resetAndRespawn = true;
     }
     private void OnDisable()
@@ -44,6 +65,9 @@ public class TerrainVFXController : MonoBehaviour
         TerrainVFXProperties.Reset();
         TerrainCallbacks.heightmapChanged -= TerrainHeightmapChangedCallback;
         TerrainCallbacks.textureChanged -= TerrainTextureChangedCallback;
+// #if UNITY_EDITOR
+//         Undo.undoRedoPerformed -= TerrainUndoCallback;  // hack to workaround TerrainCallbacks not catching undo/redo modifications
+// #endif // UNITY_EDITOR
         resetAndRespawn = true;
     }
 
@@ -56,6 +80,12 @@ public class TerrainVFXController : MonoBehaviour
     {
         resetAndRespawn = true;
     }
+
+//     void TerrainUndoCallback()
+//     {
+//         Debug.Log("Undo Reset");
+//         resetAndRespawn = true;
+//     }
 
     // Update is called once per frame
     void Update()
@@ -113,6 +143,13 @@ public class TerrainVFXController : MonoBehaviour
         {
             lodTransform = SceneView.lastActiveSceneView.camera.transform;
         }
+
+        int undoGroup = Undo.GetCurrentGroup();
+        if (undoGroup != lastUndoGroup)
+        {
+            resetAndRespawn = true;
+        }
+        lastUndoGroup = undoGroup;
 #endif
 
         TerrainVFXProperties.Setup();
