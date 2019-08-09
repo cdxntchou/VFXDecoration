@@ -20,4 +20,9 @@ Issues:
    This will look weird if you move the camera (see non-deterministic spawn pattern above)
    but will give you live update of all of the spawn baked properties.
    
+   Sometimes when you modify the VFX system, it resets the state, which causes all of the particles to disappear.
+   You can either hit "reset and respawn" on the VFX controller, or simply Ctrl+S (save) to get them back.
+   
+   Undo has a similar issue.. it tries to hook undo/redo and trigger a reset/respawn (in case terrain was modified).
+   But for some reason this is not very reliable.
    
