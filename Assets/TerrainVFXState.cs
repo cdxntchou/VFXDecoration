@@ -15,12 +15,16 @@ internal static class TerrainVFXProperties
 
     // prop ids
     static public int heightmap               { get; private set; }
+    static public int heightmapResolution     { get; private set; }
+    static public int normalmap               { get; private set; }
+    static public int normalmapResolution     { get; private set; }
     static public int heightmapPosition       { get; private set; }
     static public int heightmapSize           { get; private set; }
     static public int tilingVolumeCenter      { get; private set; }
     static public int tilingVolumeSize        { get; private set; }
     static public int lodTarget               { get; private set; }
     static public int alphamap                { get; private set; }
+    static public int alphamapResolution      { get; private set; }
     static public int alphamapSize            { get; private set; }
     static public int fadeCenter              { get; private set; }
     static public int fadeDistance            { get; private set; }
@@ -38,12 +42,16 @@ internal static class TerrainVFXProperties
         if (!idsSetup)
         {
             heightmap = Shader.PropertyToID("Heightmap");
+            heightmapResolution = Shader.PropertyToID("terrain_heightmap_resolution");
+            normalmap = Shader.PropertyToID("terrain_normalmap");
+            normalmapResolution = Shader.PropertyToID("terrain_normalmap_resolution");
             heightmapPosition = Shader.PropertyToID("Heightmap_Position");
             heightmapSize = Shader.PropertyToID("Heightmap_Size");
             tilingVolumeCenter = Shader.PropertyToID("tilingVolume_center");
             tilingVolumeSize = Shader.PropertyToID("tilingVolume_size");
             lodTarget = Shader.PropertyToID("lodTarget");
             alphamap = Shader.PropertyToID("alphamap");
+            alphamapResolution = Shader.PropertyToID("terrain_alphamap_resolution");
             alphamapSize = Shader.PropertyToID("alphamapSize");
             fadeCenter = Shader.PropertyToID("fadeCenter");
             fadeDistance = Shader.PropertyToID("fadeDistance");
@@ -323,13 +331,25 @@ public class TerrainVFXState : MonoBehaviour
     {
         // setup properties for Terrain
         vfx.SetTexture(TerrainVFXProperties.heightmap, terrain.terrainData.heightmapTexture);
+        if (vfx.HasTexture(TerrainVFXProperties.heightmapResolution))
+            vfx.SetVector2(TerrainVFXProperties.heightmapResolution, new Vector2(terrain.terrainData.heightmapTexture.width, terrain.terrainData.heightmapTexture.height));
+
         vfx.SetVector3(TerrainVFXProperties.heightmapPosition, terrain.transform.position);
+
+        if (vfx.HasTexture(TerrainVFXProperties.normalmap))
+            vfx.SetTexture(TerrainVFXProperties.normalmap, terrain.normalmapTexture);
+        if (vfx.HasTexture(TerrainVFXProperties.normalmapResolution))
+            vfx.SetVector2(TerrainVFXProperties.normalmapResolution, new Vector2(terrain.normalmapTexture.width, terrain.normalmapTexture.height));
 
         Vector3 size = terrain.terrainData.size;
         size.y *= 2.0f;     // faked because our heightmap is only [0-0.5]
         vfx.SetVector3(TerrainVFXProperties.heightmapSize, size);
 
-        vfx.SetTexture(TerrainVFXProperties.alphamap, terrain.terrainData.alphamapTextures[0]);
+        Texture alphamap = terrain.terrainData.alphamapTextures[0];
+        vfx.SetTexture(TerrainVFXProperties.alphamap, alphamap);
+        if (vfx.HasTexture(TerrainVFXProperties.alphamapResolution))
+            vfx.SetVector2(TerrainVFXProperties.alphamapResolution, new Vector2(alphamap.width, alphamap.height));
+
         // vfx.SetVector4(TerrainVFXProperties.alphamapSize, new Vector4(1.0f, 0.4f, 0.1f, 0.0f));
 
         if ((spawnBounds.width > 0.0f) && (spawnBounds.height > 0.0f))
