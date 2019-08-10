@@ -23,6 +23,7 @@ public class DecorationPatternTool : EditorWindow
         // sequence based
         Halton,
         Golden,
+        Plastic,
     }
 
     bool LoadBackground()
@@ -84,6 +85,8 @@ public class DecorationPatternTool : EditorWindow
             changed = true;
         }
 
+        bool optim = GUILayout.Button("Optimize");
+
         bool exportPattern = GUILayout.Button("Export Pattern");
         bool importPattern = GUILayout.Button("Import Pattern");
         if (exportPattern)
@@ -134,10 +137,19 @@ public class DecorationPatternTool : EditorWindow
             {
                 GenerateGoldenRatioPattern(m_SampleCount);
             }
+            else if (m_PatternType == PatternType.Plastic)
+            {
+                GeneratePlasticPattern(m_SampleCount);
+            }
             else
             {
                 GenerateRandomPattern();
             }
+        }
+
+        if (optim)
+        {
+            Optimize();
         }
 
         m_PlacementSize = EditorGUILayout.IntField("Placement Size", m_PlacementSize);
@@ -281,21 +293,28 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    void GenerateHaltonPattern(int basex, int basey, int numSamples)
+    interface ISequence2D
     {
-        // clear to zero
-        for (int y = 0; y < m_PatternHeight; ++y)
+        Vector2 Next();
+    }
+
+    class HaltonSequence2D : ISequence2D
+    {
+        int basex;
+        int basey;
+        int i;
+        public HaltonSequence2D(int basex, int basey)
         {
-            for (int x = 0; x < m_PatternWidth; ++x)
-            {
-                m_Colors[y * m_PatternWidth + x] = new Color(0, 0, 0, 0);
-            }
+            this.basex = basex;
+            this.basey = basey;
+            this.i = 0;
         }
 
-        for (int i = 0; i < numSamples; i++)
+        public Vector2 Next()
         {
+            i++;
+
             float x = 0.0f;
-            float y = 0.0f;
             {
                 float denX = (float)basex;
                 int n = i;
@@ -308,6 +327,7 @@ public class DecorationPatternTool : EditorWindow
                 }
             }
 
+            float y = 0.0f;
             {
                 float denY = (float)basey;
                 int n = i;
@@ -320,21 +340,146 @@ public class DecorationPatternTool : EditorWindow
                 }
             }
 
-            Vector2 s = new Vector2(x, y);
+            return new Vector2(x, y);
+        }
+    }
+
+    void GenerateHaltonPattern(int basex, int basey, int numSamples)
+    {
+        HaltonSequence2D haltonSequence = new HaltonSequence2D(basex, basey);
+        GenerateSequencePattern(haltonSequence, numSamples);
+    }
+
+    class PlasticSequence2D : ISequence2D
+    {
+        // plastic constant
+        const double g = 1.32471795724474602596090885447809;
+        const double a1 = 1.0 / g;
+        const double a2 = 1.0 / (g * g);
+
+        double sx = 0.5;
+        double sy = 0.5;
+
+        public Vector2 Next()
+        {
+            sx += a1;
+            sy += a2;
+            if (sx > 1.0)
+                sx -= 1.0;
+            if (sy > 1.0)
+                sy -= 1.0;
+            return new Vector2((float) sx, (float) sy);
+        }
+    }
+
+    void GeneratePlasticPattern(int numSamples)
+    {
+        PlasticSequence2D plasticSequence = new PlasticSequence2D();
+        GenerateSequencePattern(plasticSequence, numSamples);
+    }
+
+    void GenerateSequencePattern(ISequence2D sequence, int numSamples)
+    {
+        // clear to zero
+        for (int y = 0; y < m_PatternHeight; ++y)
+        {
+            for (int x = 0; x < m_PatternWidth; ++x)
+            {
+                m_Colors[y * m_PatternWidth + x] = new Color(0, 0, 0, 0);
+            }
+        }
+
+        int maxPixels = m_PatternHeight * m_PatternWidth;
+        if (numSamples > maxPixels)
+            numSamples = maxPixels;
+
+        // infinite loop catcher
+        // stop after this many total sequence values
+        // even if we don't have full sample count yet
+        int maxn = maxPixels * 4;
+        int n = 0;
+        int pointsGenerated = 0;
+        while ((pointsGenerated < numSamples) && (n < maxn))
+        {
+            // build point from sequence value (sx, sy)
+            Vector2 s = sequence.Next();
+            n++;
 
             s *= new Vector2(m_PatternWidth, m_PatternHeight);
-
             int px = Mathf.FloorToInt(s.x);
             int py = Mathf.FloorToInt(s.y);
-            s.x -= px;
-            s.y -= py;
-
-            byte threshold = (byte)(i * 255.9f / numSamples);
-            byte jitterX = (byte)(s.x * 255.0f);
-            byte jitterY = (byte)(s.y * 255.0f);
 
             if (m_Colors[py * m_PatternWidth + px].a <= 0.0f)
+            {
+                pointsGenerated++;
+
+                s.x -= px;
+                s.y -= py;
+
+                byte threshold = (byte)(pointsGenerated * 255.9f / numSamples);
+                byte jitterX = (byte)(s.x * 255.0f);
+                byte jitterY = (byte)(s.y * 255.0f);
+
                 m_Colors[py * m_PatternWidth + px] = new Color32(jitterX, jitterY, threshold, 1);
+            }
+        }
+    }
+
+    Vector2 GetPixelPos(int x, int y)
+    {
+        Color p = m_Colors[y * m_PatternWidth + x];
+        return new Vector2(
+            x + p.r,        // jitterX
+            y + p.g);       // jitterY
+    }
+
+    void Optimize()
+    {
+        // modify each pixel to move away from nearest neighbor
+        for (int y = 0; y < m_PatternHeight; ++y)
+        {
+            int[] ay = new int[3]
+            {
+                (y + m_PatternHeight - 1) % m_PatternHeight,
+                y,
+                (y + 1) % m_PatternHeight
+            };
+
+            for (int x = 0; x < m_PatternWidth; ++x)
+            {
+                int[] ax = new int[3]
+                {
+                    (x + m_PatternWidth - 1) % m_PatternWidth,
+                    x,
+                    (x + 1) % m_PatternWidth
+                };
+
+                Vector2 center = GetPixelPos(x, y);
+                float minDist = 1000.0f;
+                Vector2 minPos = new Vector2(0.0f, 0.0f);
+                for (int iy = 0; iy < 3; iy++)
+                    for (int ix = 0; ix < 3; ix++)
+                    {
+                        if ((ix != 1) || (iy != 1))
+                        {
+                            Vector2 pos = GetPixelPos(ax[ix], ay[iy]);
+                            float dist = Vector2.Distance(center, pos);
+                            if (dist < minDist)
+                            {
+                                minDist = dist;
+                                minPos = pos;
+                            }
+                        }
+                    }
+
+                if (minDist < 1000.0f)
+                {
+                    Color p = m_Colors[y * m_PatternWidth + x];
+                    p.r += (1.1f / 255.0f) * (minPos.x < center.x ? 1.0f : -1.0f);
+                    p.g += (1.1f / 255.0f) * (minPos.y < center.y ? 1.0f : -1.0f);
+                    m_Colors[y * m_PatternWidth + x] = p;
+                }
+            }
         }
     }
 
