@@ -17,9 +17,9 @@ MonoBehaviour:
     position:
       serializedVersion: 2
       x: -166
-      y: 249
-      width: 546
-      height: 600
+      y: 248
+      width: 693
+      height: 601
     contents:
     - model: {fileID: 8926484042661615821}
       id: 0
@@ -31,6 +31,12 @@ MonoBehaviour:
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661616246}
+      id: 0
+      isStickyNote: 0
+    - model: {fileID: 8926484042661616984}
+      id: 0
+      isStickyNote: 0
+    - model: {fileID: 8926484042661616986}
       id: 0
       isStickyNote: 0
   - title: Set particle position Y to Terrain Heightmap surface
@@ -203,11 +209,22 @@ MonoBehaviour:
   - title: All that update does is Cull to the volume
     position:
       serializedVersion: 2
-      x: 1290
-      y: 2017
+      x: 1229
+      y: 1958
       width: 208
       height: 131
     contents: 
+    theme: Classic
+    textSize: Small
+  - title: Lit is weird because normals follow the card
+    position:
+      serializedVersion: 2
+      x: 574
+      y: 2312
+      width: 207
+      height: 166
+    contents: need to make a different output type that allows you to use fake normals
+      (i.e. sampled from terrain normal)
     theme: Classic
     textSize: Small
   systemInfos: []
@@ -217,7 +234,7 @@ MonoBehaviour:
     x: -2353
     y: -120
     width: 4039
-    height: 2966
+    height: 3067
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -302,6 +319,11 @@ MonoBehaviour:
   - {fileID: 8926484042661616900}
   - {fileID: 8926484042661616903}
   - {fileID: 8926484042661616917}
+  - {fileID: 8926484042661616941}
+  - {fileID: 8926484042661616946}
+  - {fileID: 8926484042661616955}
+  - {fileID: 8926484042661616984}
+  - {fileID: 8926484042661616986}
   m_UIPosition: {x: 0, y: 0}
   m_UICollapsed: 1
   m_UISuperCollapsed: 0
@@ -485,6 +507,19 @@ MonoBehaviour:
         m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
       m_SerializableObject: '{"x":0.0,"y":0.0,"z":0.0}'
+    min: -Infinity
+    max: Infinity
+    descendantCount: 0
+  - name: spawnPattern
+    path: spawnPattern
+    tooltip: 
+    sheetType: m_NamedObject
+    realType: Texture2D
+    defaultValue:
+      m_Type:
+        m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"obj":{"fileID":2800000,"guid":"7ffc31926c6f130469f767e942e024c1","type":3}}'
     min: -Infinity
     max: Infinity
     descendantCount: 0
@@ -743,11 +778,12 @@ VisualEffectResource:
       tmp_co = tmp_cm[2];\n            float2 tmp_cp = float2(tmp_cn, tmp_co);\n            float2
       tmp_cq = uniform_z * tmp_cp;\n            float2 tmp_cr = tmp_cq + uniform_n;\n
       \           float2 tmp_cs = tmp_cr / uniform_ba;\n            float4 tmp_ct
-      = SampleTexture(VFX_SAMPLER(texture_c),tmp_cs,uniform_p);\n            float
-      tmp_cu = tmp_ct[0];\n            float tmp_cv = tmp_ct[1];\n            float
-      tmp_cw = tmp_ct[2];\n            float3 tmp_cx = float3(tmp_cu, tmp_cv, tmp_cw);\n
-      \           SetAttribute_595BA547( /*inout */direction, tmp_cx);\n        }\n
-      \       \n\n\n#if VFX_USE_ALIVE_CURRENT\n        if (alive)\n        {\n\t\t\tuint
+      = SampleTexture(VFX_SAMPLER(texture_c),tmp_cs,uniform_p);\n            float4
+      tmp_cu = tmp_ct * uniform_bb;\n            float4 tmp_cv = tmp_cu - uniform_bc;\n
+      \           float tmp_cw = tmp_cv[0];\n            float tmp_cx = tmp_cv[1];\n
+      \           float tmp_cy = tmp_cv[2];\n            float3 tmp_cz = float3(tmp_cw,
+      tmp_cx, tmp_cy);\n            SetAttribute_595BA547( /*inout */direction, tmp_cz);\n
+      \       }\n        \n\n\n#if VFX_USE_ALIVE_CURRENT\n        if (alive)\n        {\n\t\t\tuint
       deadIndex = deadListIn.DecrementCounter();\n            uint index = deadListIn[deadIndex];\n
       \           attributeBuffer.Store3((index * 0x4 + 0x0) << 2,asuint(position));\n
       \           attributeBuffer.Store((index * 0x8 + 0x3D0A03) << 2,asuint(texIndex));\n
@@ -1014,24 +1050,24 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 2
-      - op: 1
-        valueIndex: 14
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
-      - op: 1
-        valueIndex: 15
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
       - op: 29
-        valueIndex: 16
+        valueIndex: 14
         data[0]: 5
         data[1]: 3
         data[2]: -1
         data[3]: 2
+      - op: 1
+        valueIndex: 16
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
+      - op: 1
+        valueIndex: 17
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
       - op: 1
         valueIndex: 18
         data[0]: -1
@@ -1044,69 +1080,69 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 1
-      - op: 20
-        valueIndex: 20
-        data[0]: 10
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
       - op: 31
-        valueIndex: 21
-        data[0]: 6
+        valueIndex: 20
+        data[0]: 9
         data[1]: 7
         data[2]: -1
         data[3]: 1
       - op: 2
-        valueIndex: 22
-        data[0]: 9
-        data[1]: 9
+        valueIndex: 21
+        data[0]: 10
+        data[1]: 10
         data[2]: -1
         data[3]: -1
+      - op: 20
+        valueIndex: 23
+        data[0]: 8
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
       - op: 1
         valueIndex: 24
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 1
-      - op: 3
-        valueIndex: 25
-        data[0]: 14
-        data[1]: 11
-        data[2]: 12
-        data[3]: -1
       - op: 1
-        valueIndex: 28
+        valueIndex: 25
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: 2
+        data[3]: 1
+      - op: 3
+        valueIndex: 26
+        data[0]: 14
+        data[1]: 13
+        data[2]: 11
+        data[3]: -1
+      - op: 1
+        valueIndex: 29
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 5
       - op: 1
         valueIndex: 30
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: 1
-      - op: 1
-        valueIndex: 31
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 5
-      - op: 29
-        valueIndex: 32
-        data[0]: 16
-        data[1]: 3
-        data[2]: -1
         data[3]: 2
       - op: 1
-        valueIndex: 34
+        valueIndex: 32
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 7
+      - op: 29
+        valueIndex: 33
+        data[0]: 18
+        data[1]: 3
+        data[2]: -1
+        data[3]: 2
       - op: 31
         valueIndex: 35
-        data[0]: 17
+        data[0]: 15
         data[1]: 7
         data[2]: -1
         data[3]: 1
@@ -1152,46 +1188,46 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 1
-      - op: 1
-        valueIndex: 44
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
       - op: 29
-        valueIndex: 45
+        valueIndex: 44
         data[0]: 22
         data[1]: 3
         data[2]: -1
         data[3]: 2
+      - op: 1
+        valueIndex: 46
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
       - op: 1
         valueIndex: 47
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 4
-      - op: 1
-        valueIndex: 51
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 7
-      - op: 29
-        valueIndex: 52
-        data[0]: 27
-        data[1]: 28
-        data[2]: -1
-        data[3]: 1
       - op: 31
-        valueIndex: 53
-        data[0]: 29
+        valueIndex: 51
+        data[0]: 27
         data[1]: 7
         data[2]: -1
         data[3]: 1
       - op: 1
-        valueIndex: 54
+        valueIndex: 52
         data[0]: -1
         data[1]: -1
+        data[2]: -1
+        data[3]: 7
+      - op: 1
+        valueIndex: 53
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
+      - op: 29
+        valueIndex: 54
+        data[0]: 28
+        data[1]: 25
         data[2]: -1
         data[3]: 1
       - op: 1
@@ -1200,30 +1236,30 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 4
-      - op: 4
+      - op: 1
         valueIndex: 59
-        data[0]: 35
-        data[1]: 35
-        data[2]: 35
-        data[3]: 35
-      - op: 1
-        valueIndex: 63
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
-      - op: 1
-        valueIndex: 64
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
-      - op: 1
-        valueIndex: 65
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 6
+      - op: 8
+        valueIndex: 60
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: -1
+      - op: 1
+        valueIndex: 61
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
+      - op: 4
+        valueIndex: 62
+        data[0]: 34
+        data[1]: 34
+        data[2]: 34
+        data[3]: 34
       - op: 1
         valueIndex: 66
         data[0]: -1
@@ -1241,59 +1277,65 @@ VisualEffectResource:
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: 6
-      - op: 8
+        data[3]: 1
+      - op: 1
         valueIndex: 72
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: -1
-      - op: 62
-        valueIndex: 73
-        data[0]: 40
-        data[1]: 44
-        data[2]: -1
         data[3]: 6
       - op: 1
-        valueIndex: 74
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
-      - op: 4
-        valueIndex: 75
-        data[0]: 38
-        data[1]: 38
-        data[2]: 38
-        data[3]: 38
-      - op: 1
-        valueIndex: 79
+        valueIndex: 73
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 7
       - op: 1
-        valueIndex: 80
+        valueIndex: 74
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 4
+      - op: 4
+        valueIndex: 78
+        data[0]: 39
+        data[1]: 39
+        data[2]: 39
+        data[3]: 39
       - op: 1
-        valueIndex: 84
+        valueIndex: 82
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 1
+      - op: 1
+        valueIndex: 83
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 3
       - op: 1
-        valueIndex: 87
+        valueIndex: 86
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: 4
+        data[3]: 3
+      - op: 62
+        valueIndex: 89
+        data[0]: 44
+        data[1]: 38
+        data[2]: -1
+        data[3]: 6
+      - op: 62
+        valueIndex: 90
+        data[0]: 41
+        data[1]: 38
+        data[2]: -1
+        data[3]: 6
       - op: 62
         valueIndex: 91
-        data[0]: 43
-        data[1]: 44
+        data[0]: 37
+        data[1]: 38
         data[2]: -1
         data[3]: 6
       - op: 1
@@ -1301,42 +1343,36 @@ VisualEffectResource:
         data[0]: -1
         data[1]: -1
         data[2]: -1
-        data[3]: 3
-      - op: 62
-        valueIndex: 95
-        data[0]: 41
-        data[1]: 44
-        data[2]: -1
-        data[3]: 6
-      - op: 1
+        data[3]: 4
+      - op: 5
         valueIndex: 96
-        data[0]: -1
+        data[0]: 49
         data[1]: -1
-        data[2]: -1
-        data[3]: 1
-      - op: 1
+        data[2]: 0
+        data[3]: 3
+      - op: 5
         valueIndex: 97
-        data[0]: -1
+        data[0]: 49
         data[1]: -1
-        data[2]: -1
-        data[3]: 1
+        data[2]: 1
+        data[3]: 3
       - op: 5
         valueIndex: 98
-        data[0]: 53
+        data[0]: 50
         data[1]: -1
-        data[2]: 2
+        data[2]: 0
         data[3]: 3
-      - op: 1
-        valueIndex: 99
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 1
       - op: 5
-        valueIndex: 100
+        valueIndex: 99
         data[0]: 50
         data[1]: -1
         data[2]: 1
+        data[3]: 3
+      - op: 5
+        valueIndex: 100
+        data[0]: 49
+        data[1]: -1
+        data[2]: 2
         data[3]: 3
       - op: 5
         valueIndex: 101
@@ -1344,58 +1380,58 @@ VisualEffectResource:
         data[1]: -1
         data[2]: 2
         data[3]: 3
-      - op: 5
+      - op: 1
         valueIndex: 102
-        data[0]: 53
+        data[0]: -1
         data[1]: -1
-        data[2]: 0
-        data[3]: 3
-      - op: 5
+        data[2]: -1
+        data[3]: 1
+      - op: 1
         valueIndex: 103
-        data[0]: 53
+        data[0]: -1
         data[1]: -1
-        data[2]: 1
-        data[3]: 3
-      - op: 5
+        data[2]: -1
+        data[3]: 1
+      - op: 1
         valueIndex: 104
-        data[0]: 50
+        data[0]: -1
         data[1]: -1
-        data[2]: 0
-        data[3]: 3
+        data[2]: -1
+        data[3]: 1
       - op: 29
         valueIndex: 105
         data[0]: 57
-        data[1]: 60
+        data[1]: 55
         data[2]: -1
         data[3]: 1
       - op: 29
         valueIndex: 106
         data[0]: 62
-        data[1]: 59
-        data[2]: -1
-        data[3]: 1
-      - op: 29
-        valueIndex: 107
-        data[0]: 61
         data[1]: 63
         data[2]: -1
         data[3]: 1
+      - op: 1
+        valueIndex: 107
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
+        data[3]: 5
       - op: 5
         valueIndex: 108
         data[0]: 1
         data[1]: -1
         data[2]: 1
         data[3]: 3
-      - op: 1
-        valueIndex: 109
-        data[0]: -1
-        data[1]: -1
-        data[2]: -1
-        data[3]: 5
       - op: 29
-        valueIndex: 110
+        valueIndex: 109
         data[0]: 58
         data[1]: 56
+        data[2]: -1
+        data[3]: 1
+      - op: 29
+        valueIndex: 110
+        data[0]: 60
+        data[1]: 59
         data[2]: -1
         data[3]: 1
       - op: 1
@@ -1410,12 +1446,12 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 1
-      - op: 5
+      - op: 1
         valueIndex: 113
-        data[0]: 0
+        data[0]: -1
         data[1]: -1
-        data[2]: 1
-        data[3]: 3
+        data[2]: -1
+        data[3]: 1
       - op: 1
         valueIndex: 114
         data[0]: -1
@@ -1428,15 +1464,15 @@ VisualEffectResource:
         data[1]: -1
         data[2]: -1
         data[3]: 1
-      - op: 1
+      - op: 5
         valueIndex: 116
-        data[0]: -1
+        data[0]: 0
         data[1]: -1
-        data[2]: -1
-        data[3]: 1
+        data[2]: 1
+        data[3]: 3
       - op: 65
         valueIndex: 117
-        data[0]: 68
+        data[0]: 66
         data[1]: -1
         data[2]: -1
         data[3]: -1
@@ -1452,40 +1488,40 @@ VisualEffectResource:
         data[1]: 7
         data[2]: -1
         data[3]: 1
-      - op: 10
+      - op: 31
         valueIndex: 120
+        data[0]: 71
+        data[1]: 7
+        data[2]: -1
+        data[3]: 1
+      - op: 10
+        valueIndex: 121
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: -1
-      - op: 31
-        valueIndex: 136
-        data[0]: 70
-        data[1]: 7
-        data[2]: -1
-        data[3]: 1
       - op: 1
         valueIndex: 137
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 3
-      - op: 1
+      - op: 2
         valueIndex: 140
+        data[0]: 72
+        data[1]: 70
+        data[2]: -1
+        data[3]: -1
+      - op: 1
+        valueIndex: 142
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 2
-      - op: 2
-        valueIndex: 142
-        data[0]: 71
-        data[1]: 75
-        data[2]: -1
-        data[3]: -1
       - op: 27
         valueIndex: 144
-        data[0]: 82
-        data[1]: 83
+        data[0]: 83
+        data[1]: 82
         data[2]: -1
         data[3]: 2
       - op: 2
@@ -1505,27 +1541,33 @@ VisualEffectResource:
         data[0]: -1
         data[1]: -1
         data[2]: -1
+        data[3]: 7
+      - op: 1
+        valueIndex: 150
+        data[0]: -1
+        data[1]: -1
+        data[2]: -1
         data[3]: 3
       - op: 42
-        valueIndex: 152
-        data[0]: 79
+        valueIndex: 153
+        data[0]: 80
         data[1]: 81
         data[2]: -1
         data[3]: -1
       - op: 2
-        valueIndex: 155
-        data[0]: 80
-        data[1]: 80
+        valueIndex: 156
+        data[0]: 79
+        data[1]: 79
         data[2]: -1
         data[3]: -1
       - op: 1
-        valueIndex: 157
+        valueIndex: 158
         data[0]: -1
         data[1]: -1
         data[2]: -1
         data[3]: 1
       - op: 1
-        valueIndex: 158
+        valueIndex: 159
         data[0]: -1
         data[1]: -1
         data[2]: -1
@@ -1538,71 +1580,71 @@ VisualEffectResource:
         m_Array:
         - m_ExpressionIndex: 2
           m_Value: 1
-        - m_ExpressionIndex: 6
-          m_Value: 2
         - m_ExpressionIndex: 7
           m_Value: 0
-        - m_ExpressionIndex: 9
+        - m_ExpressionIndex: 8
           m_Value: 0.5
+        - m_ExpressionIndex: 9
+          m_Value: 2
         - m_ExpressionIndex: 10
           m_Value: 0.5
         - m_ExpressionIndex: 14
           m_Value: 0.45
-        - m_ExpressionIndex: 17
+        - m_ExpressionIndex: 15
           m_Value: 0
         - m_ExpressionIndex: 23
           m_Value: 0.5
         - m_ExpressionIndex: 24
           m_Value: -1
         - m_ExpressionIndex: 25
-          m_Value: 0
+          m_Value: 0.5
         - m_ExpressionIndex: 26
           m_Value: 2
         - m_ExpressionIndex: 27
-          m_Value: 1.5
-        - m_ExpressionIndex: 28
-          m_Value: 0.5
-        - m_ExpressionIndex: 29
           m_Value: 0
-        - m_ExpressionIndex: 35
+        - m_ExpressionIndex: 28
+          m_Value: 1.5
+        - m_ExpressionIndex: 30
+          m_Value: 0
+        - m_ExpressionIndex: 34
           m_Value: 2
-        - m_ExpressionIndex: 38
-          m_Value: 1
         - m_ExpressionIndex: 39
           m_Value: 1
-        - m_ExpressionIndex: 46
-          m_Value: 0.25
-        - m_ExpressionIndex: 55
-          m_Value: 0.6
-        - m_ExpressionIndex: 56
+        - m_ExpressionIndex: 43
           m_Value: 1
-        - m_ExpressionIndex: 58
+        - m_ExpressionIndex: 48
+          m_Value: 0.25
+        - m_ExpressionIndex: 61
+          m_Value: 0.6
+        - m_ExpressionIndex: 62
+          m_Value: 1
+        - m_ExpressionIndex: 63
           m_Value: 1
         - m_ExpressionIndex: 70
-          m_Value: 0
+          m_Value: 1
         - m_ExpressionIndex: 71
+          m_Value: 0
+        - m_ExpressionIndex: 72
           m_Value: 4
         - m_ExpressionIndex: 73
           m_Value: 0
         - m_ExpressionIndex: 74
           m_Value: 0
-        - m_ExpressionIndex: 75
-          m_Value: 1
         - m_ExpressionIndex: 77
           m_Value: 0
         - m_ExpressionIndex: 86
           m_Value: 0
-        - m_ExpressionIndex: 90
+        - m_ExpressionIndex: 91
           m_Value: 4
       m_Vector2f:
         m_Array:
         - m_ExpressionIndex: 5
           m_Value: {x: 256, y: 256}
-        - m_ExpressionIndex: 16
+        - m_ExpressionIndex: 18
           m_Value: {x: 513, y: 513}
         - m_ExpressionIndex: 22
           m_Value: {x: 513, y: 513}
-        - m_ExpressionIndex: 82
+        - m_ExpressionIndex: 83
           m_Value: {x: 1, y: 1}
       m_Vector3f:
         m_Array:
@@ -1612,39 +1654,39 @@ VisualEffectResource:
           m_Value: {x: 100, y: 32, z: 100}
         - m_ExpressionIndex: 4
           m_Value: {x: 0, y: 0, z: 0}
-        - m_ExpressionIndex: 50
+        - m_ExpressionIndex: 49
           m_Value: {x: 0, y: 0, z: 0}
-        - m_ExpressionIndex: 53
+        - m_ExpressionIndex: 50
           m_Value: {x: 0, y: 0, z: 0}
         - m_ExpressionIndex: 81
           m_Value: {x: 0, y: 0, z: 0}
-        - m_ExpressionIndex: 87
+        - m_ExpressionIndex: 88
           m_Value: {x: 80, y: 200, z: 80}
       m_Vector4f:
         m_Array:
         - m_ExpressionIndex: 31
-          m_Value: {x: 0.5226286, y: 0.3984396, z: 0.2509652, w: 1}
-        - m_ExpressionIndex: 36
           m_Value: {x: 0.5660378, y: 0.23332007, z: 0.024029896, w: 1}
+        - m_ExpressionIndex: 36
+          m_Value: {x: 0.5226286, y: 0.3984396, z: 0.2509652, w: 1}
         - m_ExpressionIndex: 42
           m_Value: {x: 0.9150943, y: 0.3696759, z: 0.12517802, w: 1}
-        - m_ExpressionIndex: 49
+        - m_ExpressionIndex: 46
           m_Value: {x: 1, y: 0.2, z: 0, w: 0}
-        - m_ExpressionIndex: 51
+        - m_ExpressionIndex: 54
           m_Value: {x: 0.5, y: 0.23069848, z: 0.115566045, w: 1}
       m_Uint:
         m_Array:
-        - m_ExpressionIndex: 40
-          m_Value: 2
+        - m_ExpressionIndex: 37
+          m_Value: 0
         - m_ExpressionIndex: 41
           m_Value: 1
-        - m_ExpressionIndex: 43
-          m_Value: 0
+        - m_ExpressionIndex: 44
+          m_Value: 2
       m_Int:
         m_Array:
-        - m_ExpressionIndex: 18
+        - m_ExpressionIndex: 17
           m_Value: 1
-        - m_ExpressionIndex: 68
+        - m_ExpressionIndex: 66
           m_Value: 100000
       m_Matrix4x4f:
         m_Array: []
@@ -1654,57 +1696,61 @@ VisualEffectResource:
         m_Array: []
       m_NamedObject:
         m_Array:
-        - m_ExpressionIndex: 20
+        - m_ExpressionIndex: 19
           m_Value: {fileID: 2800000, guid: 276d9e395ae18fe40a9b4988549f2349, type: 3}
-        - m_ExpressionIndex: 32
+        - m_ExpressionIndex: 33
           m_Value: {fileID: 0}
-        - m_ExpressionIndex: 48
+        - m_ExpressionIndex: 45
           m_Value: {fileID: 0}
-        - m_ExpressionIndex: 91
+        - m_ExpressionIndex: 87
+          m_Value: {fileID: 2800000, guid: 7ffc31926c6f130469f767e942e024c1, type: 3}
+        - m_ExpressionIndex: 92
           m_Value: {fileID: 2800000, guid: b2eb562a4180b674680ef2476f41cda5, type: 3}
       m_Bool:
         m_Array: []
     m_ExposedExpressions:
     - nameId: alphamap
-      index: 20
+      index: 19
     - nameId: alphamap_color0
-      index: 31
-    - nameId: alphamap_color1
       index: 36
+    - nameId: alphamap_color1
+      index: 31
     - nameId: alphamap_color2
       index: 42
     - nameId: alphamap_color3
-      index: 51
+      index: 54
     - nameId: alphamapSize
-      index: 49
+      index: 46
     - nameId: createBounds_max
-      index: 53
-    - nameId: createBounds_min
       index: 50
+    - nameId: createBounds_min
+      index: 49
     - nameId: createCount
-      index: 68
+      index: 66
     - nameId: fadeCenter
       index: 4
     - nameId: fadeDistance
-      index: 25
+      index: 30
     - nameId: Heightmap
-      index: 48
+      index: 45
     - nameId: Heightmap_Position
       index: 0
     - nameId: Heightmap_Size
       index: 1
+    - nameId: spawnPattern
+      index: 87
     - nameId: terrain_alphamap_resolution
       index: 5
     - nameId: terrain_heightmap_resolution
       index: 22
     - nameId: terrain_normalmap
-      index: 32
+      index: 33
     - nameId: terrain_normalmap_resolution
-      index: 16
+      index: 18
     - nameId: tilingVolume_center
       index: 81
     - nameId: tilingVolume_size
-      index: 87
+      index: 88
     m_Buffers:
     - type: 1
       size: 13000797
@@ -1885,7 +1931,7 @@ VisualEffectResource:
       - nameId: Count
         index: 85
       - nameId: Delay
-        index: 89
+        index: 90
       params: []
       processor: {fileID: 0}
       shaderSourceIndex: -1
@@ -1923,9 +1969,9 @@ VisualEffectResource:
       index: 7
     values:
     - nameId: bounds_center
-      index: 88
+      index: 89
     - nameId: bounds_size
-      index: 87
+      index: 88
     tasks:
     - type: 536870912
       buffers:
@@ -1940,94 +1986,94 @@ VisualEffectResource:
       temporaryBuffers: []
       values:
       - nameId: uniform_b
-        index: 63
+        index: 55
       - nameId: uniform_c
-        index: 52
+        index: 53
       - nameId: uniform_d
-        index: 66
-      - nameId: uniform_e
-        index: 59
-      - nameId: uniform_f
-        index: 54
-      - nameId: uniform_g
-        index: 65
-      - nameId: uniform_h
-        index: 60
-      - nameId: uniform_i
-        index: 45
-      - nameId: uniform_j
         index: 64
+      - nameId: uniform_e
+        index: 56
+      - nameId: uniform_f
+        index: 52
+      - nameId: uniform_g
+        index: 68
+      - nameId: uniform_h
+        index: 59
+      - nameId: uniform_i
+        index: 51
+      - nameId: uniform_j
+        index: 69
       - nameId: uniform_k
-        index: 30
+        index: 29
       - nameId: uniform_l
         index: 0
       - nameId: uniform_m
         index: 1
       - nameId: uniform_n
-        index: 13
+        index: 12
       - nameId: uniform_o
         index: 22
       - nameId: uniform_p
-        index: 34
+        index: 32
       - nameId: uniform_q
         index: 67
       - nameId: uniform_r
-        index: 72
+        index: 75
       - nameId: A_c
         index: 86
       - nameId: B_c
-        index: 90
+        index: 91
       - nameId: uniform_u
-        index: 28
+        index: 25
       - nameId: uniform_v
-        index: 15
-      - nameId: uniform_w
-        index: 18
-      - nameId: uniform_x
-        index: 33
-      - nameId: uniform_y
-        index: 56
-      - nameId: uniform_z
-        index: 19
-      - nameId: uniform_ba
         index: 16
+      - nameId: uniform_w
+        index: 17
+      - nameId: uniform_x
+        index: 35
+      - nameId: uniform_y
+        index: 63
+      - nameId: uniform_z
+        index: 20
+      - nameId: uniform_ba
+        index: 18
       - nameId: uniform_bb
-        index: 37
+        index: 40
       - nameId: uniform_bc
         index: 47
       - nameId: uniform_bd
-        index: 69
+        index: 65
       - nameId: uniform_be
-        index: 49
+        index: 46
       - nameId: uniform_bf
-        index: 8
+        index: 6
       - nameId: uniform_bg
         index: 5
       - nameId: uniform_bh
         index: 21
       - nameId: uniform_bi
-        index: 46
+        index: 48
       - nameId: uniform_bj
-        index: 31
-      - nameId: uniform_bk
         index: 36
+      - nameId: uniform_bk
+        index: 31
       - nameId: uniform_bl
         index: 42
       - nameId: uniform_bm
-        index: 51
+        index: 54
       - nameId: uniform_bn
         index: 77
       - nameId: texture_b
-        index: 48
+        index: 45
       - nameId: texture_c
-        index: 32
+        index: 33
       - nameId: texture_d
-        index: 20
+        index: 19
       params:
       - nameId: bounds_center
-        index: 88
+        index: 89
       - nameId: bounds_size
-        index: 87
+        index: 88
       processor: {fileID: 0}
       shaderSourceIndex: 0
     - type: 805306368
@@ -2043,7 +2089,7 @@ VisualEffectResource:
       - nameId: box_center_a
         index: 81
       - nameId: box_size_a
-        index: 87
+        index: 88
       params: []
       processor: {fileID: 0}
       shaderSourceIndex: 1
@@ -2077,17 +2123,17 @@ VisualEffectResource:
       - nameId: uniform_c
         index: 4
       - nameId: uniform_d
-        index: 25
+        index: 30
       - nameId: uniform_e
-        index: 55
+        index: 61
       - nameId: uniform_f
         index: 74
       - nameId: flipBookSize
-        index: 83
+        index: 82
       - nameId: invFlipBookSize
         index: 84
       - nameId: mainTexture
-        index: 91
+        index: 92
       params:
       - nameId: sortPriority
         index: 0
@@ -3114,7 +3160,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615308}
   m_ExposedName: alphamap
   m_Exposed: 1
-  m_Order: 12
+  m_Order: 13
   m_Category: 
   m_Min:
     m_Type:
@@ -3191,7 +3237,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615310}
   m_ExposedName: alphamapSize
   m_Exposed: 1
-  m_Order: 14
+  m_Order: 15
   m_Category: 
   m_Min:
     m_Type:
@@ -3984,7 +4030,7 @@ MonoBehaviour:
   m_Parent: {fileID: 114350483966674976}
   m_Children:
   - {fileID: 8926484042661615750}
-  m_UIPosition: {x: 836, y: 1940}
+  m_UIPosition: {x: 834, y: 1916}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -6899,7 +6945,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: 537, y: 2568}
+  m_UIPosition: {x: 516, y: 2578}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -13546,7 +13592,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616534}
   m_ExposedName: alphamap_color0
   m_Exposed: 1
-  m_Order: 15
+  m_Order: 16
   m_Category: 
   m_Min:
     m_Type:
@@ -13759,7 +13805,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616540}
   m_ExposedName: alphamap_color1
   m_Exposed: 1
-  m_Order: 16
+  m_Order: 17
   m_Category: 
   m_Min:
     m_Type:
@@ -13972,7 +14018,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616546}
   m_ExposedName: alphamap_color2
   m_Exposed: 1
-  m_Order: 17
+  m_Order: 18
   m_Category: 
   m_Min:
     m_Type:
@@ -14185,7 +14231,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616552}
   m_ExposedName: alphamap_color3
   m_Exposed: 1
-  m_Order: 18
+  m_Order: 19
   m_Category: 
   m_Min:
     m_Type:
@@ -15834,7 +15880,7 @@ MonoBehaviour:
   m_Children:
   - {fileID: 8926484042661616653}
   - {fileID: 8926484042661616659}
-  m_UIPosition: {x: 818, y: 2295}
+  m_UIPosition: {x: 810, y: 2249}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -15844,7 +15890,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616629}
   m_OutputSlots: []
   m_Label: 
-  m_Data: {fileID: 8926484042661616660}
+  m_Data: {fileID: 8926484042661616983}
   m_InputFlowSlot:
   - link: []
   m_OutputFlowSlot:
@@ -16344,29 +16390,7 @@ MonoBehaviour:
   m_InputSlots: []
   m_OutputSlots: []
   m_Disabled: 0
-  mode: 0
---- !u!114 &8926484042661616660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d78581a96eae8bf4398c282eb0b098bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Parent: {fileID: 114350483966674976}
-  m_Children: []
-  m_UIPosition: {x: 0, y: 0}
-  m_UICollapsed: 1
-  m_UISuperCollapsed: 0
-  title: 
-  m_Owners:
-  - {fileID: 8926484042661616626}
-  m_Capacity: 65536
-  m_Space: 0
+  mode: 1
 --- !u!114 &8926484042661616661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16600,7 +16624,7 @@ MonoBehaviour:
     attributes: []
   m_Direction: 0
   m_LinkedSlots:
-  - {fileID: 8926484042661616875}
+  - {fileID: 8926484042661616926}
 --- !u!114 &8926484042661616668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17387,7 +17411,7 @@ MonoBehaviour:
   - {fileID: 8926484042661616823}
   m_ExposedName: terrain_alphamap_resolution
   m_Exposed: 1
-  m_Order: 13
+  m_Order: 14
   m_Category: 
   m_Min:
     m_Type:
@@ -18533,7 +18557,6 @@ MonoBehaviour:
     attributes: []
   m_Direction: 1
   m_LinkedSlots:
-  - {fileID: 8926484042661616667}
   - {fileID: 8926484042661616907}
 --- !u!114 &8926484042661616876
 MonoBehaviour:
@@ -20149,7 +20172,8 @@ MonoBehaviour:
         Culture=neutral, PublicKeyToken=null
     attributes: []
   m_Direction: 1
-  m_LinkedSlots: []
+  m_LinkedSlots:
+  - {fileID: 8926484042661616667}
 --- !u!114 &8926484042661616927
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20268,6 +20292,1442 @@ MonoBehaviour:
   m_UICollapsed: 1
   m_UISuperCollapsed: 0
   m_MasterSlot: {fileID: 8926484042661616926}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: w
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 486e063e1ed58c843942ea4122829ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 535, y: 2755}
+  m_UICollapsed: 0
+  m_UISuperCollapsed: 0
+  m_InputSlots: []
+  m_OutputSlots:
+  - {fileID: 8926484042661616942}
+  attribute: direction
+  location: 0
+  mask: xyz
+--- !u!114 &8926484042661616942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616943}
+  - {fileID: 8926484042661616944}
+  - {fileID: 8926484042661616945}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616942}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616941}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: direction
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots:
+  - {fileID: 8926484042661616960}
+--- !u!114 &8926484042661616943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616942}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616942}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616942}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616942}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616942}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616942}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 955b0c175a6f3bb4582e92f3de8f0626, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 528, y: 2871}
+  m_UICollapsed: 0
+  m_UISuperCollapsed: 0
+  m_InputSlots:
+  - {fileID: 8926484042661616947}
+  m_OutputSlots:
+  - {fileID: 8926484042661616951}
+  m_Type:
+    m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+--- !u!114 &8926484042661616947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616948}
+  - {fileID: 8926484042661616949}
+  - {fileID: 8926484042661616950}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616947}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616946}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":0.0,"y":1.0,"z":0.0}'
+    m_Space: 2147483647
+  m_Property:
+    name: 
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616947}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616947}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616947}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616947}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616947}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616947}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616952}
+  - {fileID: 8926484042661616953}
+  - {fileID: 8926484042661616954}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616951}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616946}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: 
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots:
+  - {fileID: 8926484042661616968}
+--- !u!114 &8926484042661616952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616951}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616951}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616951}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616951}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616951}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616951}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fab5164109319454a9bccf2583401f6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 803, y: 2811}
+  m_UICollapsed: 0
+  m_UISuperCollapsed: 0
+  m_InputSlots:
+  - {fileID: 8926484042661616960}
+  - {fileID: 8926484042661616968}
+  - {fileID: 8926484042661616958}
+  m_OutputSlots:
+  - {fileID: 8926484042661616964}
+  m_Type:
+  - m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+      PublicKeyToken=b77a5c561934e089
+--- !u!114 &8926484042661616958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616958}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616955}
+    m_Value:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 0.75
+    m_Space: 2147483647
+  m_Property:
+    name: s
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes:
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The amount to interpolate between x and y (0-1).
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616961}
+  - {fileID: 8926484042661616962}
+  - {fileID: 8926484042661616963}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616960}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616955}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":0.0,"y":0.0,"z":0.0}'
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes:
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The start value.
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots:
+  - {fileID: 8926484042661616942}
+--- !u!114 &8926484042661616961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616960}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616960}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616960}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616960}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616960}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616960}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616965}
+  - {fileID: 8926484042661616966}
+  - {fileID: 8926484042661616967}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616964}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616955}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: 
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616964}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616964}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616964}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616964}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616964}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616964}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac39bd03fca81b849929b9c966f1836a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616969}
+  - {fileID: 8926484042661616970}
+  - {fileID: 8926484042661616971}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616968}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616955}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":0.0,"y":0.0,"z":0.0}'
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes:
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The end value.
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots:
+  - {fileID: 8926484042661616951}
+--- !u!114 &8926484042661616969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616968}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616968}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616968}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616968}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616968}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616968}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78581a96eae8bf4398c282eb0b098bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  title: 
+  m_Owners:
+  - {fileID: 8926484042661616626}
+  m_Capacity: 65536
+  m_Space: 0
+--- !u!114 &8926484042661616984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 330e0fca1717dde4aaa144f48232aa64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 0
+  m_UISuperCollapsed: 0
+  m_InputSlots: []
+  m_OutputSlots:
+  - {fileID: 8926484042661616985}
+  m_ExposedName: spawnPattern
+  m_Exposed: 1
+  m_Order: 12
+  m_Category: 
+  m_Min:
+    m_Type:
+      m_SerializableType: 
+    m_SerializableObject: 
+  m_Max:
+    m_Type:
+      m_SerializableType: 
+    m_SerializableObject: 
+  m_IsOutput: 0
+  m_Tooltip: 
+  m_Nodes:
+  - m_Id: 0
+    linkedSlots:
+    - outputSlot: {fileID: 8926484042661616985}
+      inputSlot: {fileID: 8926484042661616987}
+    position: {x: 66, y: 324}
+    expandedSlots: []
+    expanded: 0
+--- !u!114 &8926484042661616985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70a331b1d86cc8d4aa106ccbe0da5852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616985}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616984}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"obj":{"fileID":2800000,"guid":"7ffc31926c6f130469f767e942e024c1","type":3}}'
+    m_Space: 2147483647
+  m_Property:
+    name: o
+    m_serializedType:
+      m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots:
+  - {fileID: 8926484042661616987}
+--- !u!114 &8926484042661616986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ad58bc1dec884458b12f6731fc091c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 114350483966674976}
+  m_Children: []
+  m_UIPosition: {x: 228, y: 311}
+  m_UICollapsed: 0
+  m_UISuperCollapsed: 0
+  m_InputSlots:
+  - {fileID: 8926484042661616987}
+  - {fileID: 8926484042661616988}
+  - {fileID: 8926484042661616991}
+  m_OutputSlots:
+  - {fileID: 8926484042661616992}
+--- !u!114 &8926484042661616987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70a331b1d86cc8d4aa106ccbe0da5852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616987}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616986}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: texture
+    m_serializedType:
+      m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes:
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The texture to sample from.
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots:
+  - {fileID: 8926484042661616985}
+--- !u!114 &8926484042661616988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b2b751071c7fc14f9fa503163991826, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616989}
+  - {fileID: 8926484042661616990}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616988}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616986}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector2, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":0.0,"y":0.0}'
+    m_Space: 2147483647
+  m_Property:
+    name: uv
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector2, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes:
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The texture coordinate used for the sampling.
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616988}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616988}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616988}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616988}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616991}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616986}
+    m_Value:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 0
+    m_Space: 2147483647
+  m_Property:
+    name: mipLevel
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes:
+    - m_Type: 1
+      m_Min: 0
+      m_Max: Infinity
+      m_Tooltip: 
+      m_Regex: 
+      m_RegexMaxLength: 0
+    - m_Type: 3
+      m_Min: -Infinity
+      m_Max: Infinity
+      m_Tooltip: The mip level to sample from.
+      m_Regex: 
+      m_RegexMaxLength: 0
+  m_Direction: 0
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c499060cea9bbb24b8d723eafa343303, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 0}
+  m_Children:
+  - {fileID: 8926484042661616993}
+  - {fileID: 8926484042661616994}
+  - {fileID: 8926484042661616995}
+  - {fileID: 8926484042661616996}
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616992}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661616986}
+    m_Value:
+      m_Type:
+        m_SerializableType: UnityEngine.Vector4, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+      m_SerializableObject: '{"x":0.0,"y":0.0,"z":0.0,"w":0.0}'
+    m_Space: 2147483647
+  m_Property:
+    name: s
+    m_serializedType:
+      m_SerializableType: UnityEngine.Vector4, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616992}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616992}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: x
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616992}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616992}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: y
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616992}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616992}
+  m_MasterData:
+    m_Owner: {fileID: 0}
+    m_Value:
+      m_Type:
+        m_SerializableType: 
+      m_SerializableObject: 
+    m_Space: 2147483647
+  m_Property:
+    name: z
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    attributes: []
+  m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661616996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Parent: {fileID: 8926484042661616992}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661616992}
   m_MasterData:
     m_Owner: {fileID: 0}
     m_Value:
