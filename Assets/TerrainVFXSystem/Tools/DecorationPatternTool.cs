@@ -85,7 +85,11 @@ public class DecorationPatternTool : EditorWindow
             changed = true;
         }
 
+        GUILayout.BeginHorizontal();
         bool optim = GUILayout.Button("Optimize");
+        bool optim10 = GUILayout.Button("Optimize 10");
+        bool optim100 = GUILayout.Button("Optimize 100");
+        GUILayout.EndHorizontal();
 
         bool exportPattern = GUILayout.Button("Export Pattern");
         bool importPattern = GUILayout.Button("Import Pattern");
@@ -150,6 +154,16 @@ public class DecorationPatternTool : EditorWindow
         if (optim)
         {
             Optimize();
+        }
+        if (optim10)
+        {
+            for (int i = 0; i < 10; i++)
+                Optimize();
+        }
+        if (optim100)
+        {
+            for (int i = 0; i < 100; i++)
+                Optimize();
         }
 
         m_PlacementSize = EditorGUILayout.IntField("Placement Size", m_PlacementSize);
