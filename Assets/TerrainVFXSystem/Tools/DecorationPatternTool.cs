@@ -165,11 +165,10 @@ public class DecorationPatternTool : EditorWindow
             var color = m_Colors[i];
             if ((color.a > 0) && (color.b < m_Threshold / 256.0f))
             {
-                float deltaX = 0.5f * (color.r * 2.0f - 1.0f);
-                float deltaY = 0.5f * (color.g * 2.0f - 1.0f);
-
-                float x = m_PlacementSpacing * (i % m_PatternWidth + deltaX) + halfPointSize;
-                float y = yPos + m_PlacementSpacing * (i / m_PatternWidth + deltaY) + halfPointSize;
+                float deltaX = color.r;
+                float deltaY = color.g;
+                float x = m_PlacementSpacing * (i % m_PatternWidth + deltaX) - halfPointSize;
+                float y = yPos + m_PlacementSpacing * (i / m_PatternWidth + deltaY) - halfPointSize;
 
                 GUI.DrawTexture(new Rect(x, y, m_PlacementSize, m_PlacementSize), m_Placement);
             }
@@ -477,6 +476,8 @@ public class DecorationPatternTool : EditorWindow
                     Color p = m_Colors[y * m_PatternWidth + x];
                     p.r += (1.1f / 255.0f) * (minPos.x < center.x ? 1.0f : -1.0f);
                     p.g += (1.1f / 255.0f) * (minPos.y < center.y ? 1.0f : -1.0f);
+                    p.r = Mathf.Clamp01(p.r);
+                    p.g = Mathf.Clamp01(p.g);
                     m_Colors[y * m_PatternWidth + x] = p;
                 }
             }
