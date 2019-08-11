@@ -9,63 +9,6 @@ using UnityEditor;
 #endif
 
 
-internal static class TerrainVFXProperties
-{
-    static private bool idsSetup = false;
-
-    // prop ids
-    static public int heightmap               { get; private set; }
-    static public int heightmapResolution     { get; private set; }
-    static public int normalmap               { get; private set; }
-    static public int normalmapResolution     { get; private set; }
-    static public int heightmapPosition       { get; private set; }
-    static public int heightmapSize           { get; private set; }
-    static public int tilingVolumeCenter      { get; private set; }
-    static public int tilingVolumeSize        { get; private set; }
-    static public int lodTarget               { get; private set; }
-    static public int alphamap                { get; private set; }
-    static public int alphamapResolution      { get; private set; }
-    static public int alphamapSize            { get; private set; }
-    static public int fadeCenter              { get; private set; }
-    static public int fadeDistance            { get; private set; }
-    static public int createCount             { get; private set; }
-    static public int createBoundsMin         { get; private set; }
-    static public int createBoundsMax         { get; private set; }
-
-    static public void Reset()
-    {
-        idsSetup = false;
-    }
-
-    static public void Setup()
-    {
-        if (!idsSetup)
-        {
-            heightmap = Shader.PropertyToID("Heightmap");
-            heightmapResolution = Shader.PropertyToID("terrain_heightmap_resolution");
-            normalmap = Shader.PropertyToID("terrain_normalmap");
-            normalmapResolution = Shader.PropertyToID("terrain_normalmap_resolution");
-            heightmapPosition = Shader.PropertyToID("Heightmap_Position");
-            heightmapSize = Shader.PropertyToID("Heightmap_Size");
-            tilingVolumeCenter = Shader.PropertyToID("tilingVolume_center");
-            tilingVolumeSize = Shader.PropertyToID("tilingVolume_size");
-            lodTarget = Shader.PropertyToID("lodTarget");
-            alphamap = Shader.PropertyToID("alphamap");
-            alphamapResolution = Shader.PropertyToID("terrain_alphamap_resolution");
-            alphamapSize = Shader.PropertyToID("alphamapSize");
-            fadeCenter = Shader.PropertyToID("fadeCenter");
-            fadeDistance = Shader.PropertyToID("fadeDistance");
-
-            createCount = Shader.PropertyToID("createCount");
-            createBoundsMin = Shader.PropertyToID("createBounds_min");
-            createBoundsMax = Shader.PropertyToID("createBounds_max");
-
-            idsSetup = true;
-        }
-    }
-}
-
-
 public class TerrainState
 {
 //    public Rect liveBounds;
@@ -81,7 +24,10 @@ public class TerrainVFXState : MonoBehaviour
     // serialized settings
     public float volumeSize;
     public float forwardBiasDistance;
-    public float density;
+    public Texture2D spawnPattern;
+    public float density;           // desired number of placements in one square meter
+    public float spacing;           // desired placement grid size (distance between grid placements in one axis)
+    public bool resetAndRespawn;
     public bool debugLiveBounds;
 
     // runtime state
@@ -178,6 +124,12 @@ public class TerrainVFXState : MonoBehaviour
         if (vfx == null)
             return;
 
+        if (this.resetAndRespawn)
+        {
+            resetAndRespawn = true;
+            this.resetAndRespawn = false;
+        }
+
         if (terrainStates == null)
         {
             terrainStates = new Dictionary<Terrain, TerrainState>();
@@ -195,7 +147,14 @@ public class TerrainVFXState : MonoBehaviour
             }
         }
 
+        // calculate ideal tiling volume center
         Vector3 tilingVolumeCenter = lodTransform.position + lodTransform.forward * forwardBiasDistance;
+
+        // quantize to spacing
+        tilingVolumeCenter.x = Mathf.Round(tilingVolumeCenter.x / spacing) * spacing;
+        tilingVolumeCenter.y = Mathf.Round(tilingVolumeCenter.y / spacing) * spacing;
+        tilingVolumeCenter.z = Mathf.Round(tilingVolumeCenter.z / spacing) * spacing;
+
         Vector3 tilingVolumeSize = new Vector3(volumeSize, 2000.0f, volumeSize);
 
         // target Bounds is what we would ideally want as our live bounds (fully populated area)
@@ -474,27 +433,36 @@ public class TerrainVFXState : MonoBehaviour
     {
         float deltaX = Mathf.Max(maxX - minX, 0.0f);
         float deltaZ = Mathf.Max(maxZ - minZ, 0.0f);
-        float area = deltaX * deltaZ;
 
-        if (area > 0.0f)
+        int countX = Mathf.RoundToInt(deltaX / spacing);
+        int countZ = Mathf.RoundToInt(deltaZ / spacing);
+        int count = countX * countZ;
+
+        if (count > 0)
         {
-            // dither the count to 'fix' rounding error for small areas
-            int count = Mathf.FloorToInt(area * density + UnityEngine.Random.value - 0.001f);
+            // BUG : can't seem to get attributes to work, just going to use properties for now
+            // eventAttr.SetInt(TerrainVFXProperties.createCountID, count);        
+            // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMinID, new Vector3(minX, 0.0f, minZ));
+            // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
 
-            if (count > 0)
-            {
-                // BUG : can't seem to get attributes to work, just going to use properties for now
-                // eventAttr.SetInt(TerrainVFXProperties.createCountID, count);        
-                // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMinID, new Vector3(minX, 0.0f, minZ));
-                // eventAttr.SetVector3(TerrainVFXProperties.createBoundsMaxID, new Vector3(maxX, 0.0f, maxZ));
+            int startX = Mathf.RoundToInt(minX / spacing);
+            int startZ = Mathf.RoundToInt(minZ / spacing);
 
-                vfx.SetInt(TerrainVFXProperties.createCount, count);
-                vfx.SetVector3(TerrainVFXProperties.createBoundsMin, new Vector3(minX, 0.0f, minZ));
-                vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
+            vfx.SetInt(TerrainVFXProperties.createCount, count);
+            vfx.SetVector4(TerrainVFXProperties.createParams, new Vector4(countX, countZ, startX, startZ));
+            vfx.SetVector3(TerrainVFXProperties.createBoundsMin, new Vector3(minX, 0.0f, minZ));
+            vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
+            vfx.SetVector3(TerrainVFXProperties.createBoundsScale, new Vector3(deltaX, 0.0f, deltaZ));
 
-                vfx.SendEvent("CreateInBounds", null);
-                vfx.Simulate(1.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
-            }
+            if (vfx.HasTexture(TerrainVFXProperties.createPattern))
+                vfx.SetTexture(TerrainVFXProperties.createPattern, spawnPattern);
+
+            if (vfx.HasVector4(TerrainVFXProperties.createPatternResolution))
+                vfx.SetVector4(TerrainVFXProperties.createPatternResolution,
+                    new Vector4(spawnPattern.width, spawnPattern.height, 1.0f / spawnPattern.width, 1.0f / spawnPattern.height));
+
+            vfx.SendEvent("CreateInBounds", null);
+            vfx.Simulate(1.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
         }
     }
 }

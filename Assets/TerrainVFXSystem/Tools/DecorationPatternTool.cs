@@ -63,7 +63,7 @@ public class DecorationPatternTool : EditorWindow
         m_PatternType = (PatternType)EditorGUILayout.EnumPopup("Pattern Type", m_PatternType);
         if (m_PatternType >= PatternType.Halton)
         {
-            m_SampleCount = EditorGUILayout.IntField("Sample Count", m_SampleCount);
+            m_FillPercentage = EditorGUILayout.Slider("Fill Percentage", m_FillPercentage, 0.0f, 1.0f);
         }
         else
         {
@@ -135,15 +135,15 @@ public class DecorationPatternTool : EditorWindow
 
             if (m_PatternType == PatternType.Halton)
             {
-                GenerateHaltonPattern(2, 3, m_SampleCount);
+                GenerateHaltonPattern(2, 3);
             }
             else if (m_PatternType == PatternType.Golden)
             {
-                GenerateGoldenRatioPattern(m_SampleCount);
+                GenerateGoldenRatioPattern();
             }
             else if (m_PatternType == PatternType.Plastic)
             {
-                GeneratePlasticPattern(m_SampleCount);
+                GeneratePlasticPattern();
             }
             else
             {
@@ -189,8 +189,13 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    void GenerateGoldenRatioPattern(int numSamples)
+    void GenerateGoldenRatioPattern()
     {
+        int maxPixels = m_PatternHeight * m_PatternWidth;
+        int numSamples = Mathf.RoundToInt(m_FillPercentage * maxPixels);
+        if (numSamples > maxPixels)
+            numSamples = maxPixels;
+
         Vector2[] points = new Vector2[numSamples];
 
         // set the initial first coordinate
@@ -297,7 +302,7 @@ public class DecorationPatternTool : EditorWindow
             s.x -= px;
             s.y -= py;
 
-            byte threshold = (byte)(i * 255.9f / numSamples);
+            byte threshold = (byte)(UnityEngine.Random.value * 255.9f);
             byte jitterX = (byte)(s.x * 255.0f);
             byte jitterY = (byte)(s.y * 255.0f);
 
@@ -357,10 +362,10 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    void GenerateHaltonPattern(int basex, int basey, int numSamples)
+    void GenerateHaltonPattern(int baseX, int baseY)
     {
-        HaltonSequence2D haltonSequence = new HaltonSequence2D(basex, basey);
-        GenerateSequencePattern(haltonSequence, numSamples);
+        HaltonSequence2D haltonSequence = new HaltonSequence2D(baseX, baseY);
+        GenerateSequencePattern(haltonSequence);
     }
 
     class PlasticSequence2D : ISequence2D
@@ -385,13 +390,13 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    void GeneratePlasticPattern(int numSamples)
+    void GeneratePlasticPattern()
     {
         PlasticSequence2D plasticSequence = new PlasticSequence2D();
-        GenerateSequencePattern(plasticSequence, numSamples);
+        GenerateSequencePattern(plasticSequence);
     }
 
-    void GenerateSequencePattern(ISequence2D sequence, int numSamples)
+    void GenerateSequencePattern(ISequence2D sequence)
     {
         // clear to zero
         for (int y = 0; y < m_PatternHeight; ++y)
@@ -403,6 +408,7 @@ public class DecorationPatternTool : EditorWindow
         }
 
         int maxPixels = m_PatternHeight * m_PatternWidth;
+        int numSamples = Mathf.RoundToInt(m_FillPercentage * maxPixels);
         if (numSamples > maxPixels)
             numSamples = maxPixels;
 
@@ -438,12 +444,10 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    Vector2 GetPixelPos(int x, int y)
+    Vector2 GetSubpixelPos(int x, int y)
     {
         Color p = m_Colors[y * m_PatternWidth + x];
-        return new Vector2(
-            x + p.r,        // jitterX
-            y + p.g);       // jitterY
+        return new Vector2(p.r, p.g);
     }
 
     void Optimize()
@@ -467,29 +471,31 @@ public class DecorationPatternTool : EditorWindow
                     (x + 1) % m_PatternWidth
                 };
 
-                Vector2 center = GetPixelPos(x, y);
-                float minDist = 1000.0f;
-                Vector2 minPos = new Vector2(0.0f, 0.0f);
+                Vector2 centerSub = GetSubpixelPos(x, y);
+                float minDistSqr = 1000.0f;
+                Vector2 minPosRelative = new Vector2(0.0f, 0.0f);
                 for (int iy = 0; iy < 3; iy++)
                     for (int ix = 0; ix < 3; ix++)
                     {
                         if ((ix != 1) || (iy != 1))
                         {
-                            Vector2 pos = GetPixelPos(ax[ix], ay[iy]);
-                            float dist = Vector2.Distance(center, pos);
-                            if (dist < minDist)
+                            Vector2 pointSub = GetSubpixelPos(ax[ix], ay[iy]);
+                            Vector2 pointRelative = new Vector2(ix - 1, iy - 1) + pointSub - centerSub;
+
+                            float distSqr = Vector2.SqrMagnitude(pointRelative);
+                            if (distSqr < minDistSqr)
                             {
-                                minDist = dist;
-                                minPos = pos;
+                                minDistSqr = distSqr;
+                                minPosRelative = pointRelative;
                             }
                         }
                     }
 
-                if (minDist < 1000.0f)
+                if (minDistSqr < 1000.0f)
                 {
                     Color p = m_Colors[y * m_PatternWidth + x];
-                    p.r += (1.1f / 255.0f) * (minPos.x < center.x ? 1.0f : -1.0f);
-                    p.g += (1.1f / 255.0f) * (minPos.y < center.y ? 1.0f : -1.0f);
+                    p.r += (1.1f / 255.0f) * (minPosRelative.x < 0.0f ? 1.0f : -1.0f);
+                    p.g += (1.1f / 255.0f) * (minPosRelative.y < 0.0f ? 1.0f : -1.0f);
                     p.r = Mathf.Clamp01(p.r);
                     p.g = Mathf.Clamp01(p.g);
                     m_Colors[y * m_PatternWidth + x] = p;
@@ -532,16 +538,16 @@ public class DecorationPatternTool : EditorWindow
         }
     }
 
-    int m_SampleCount = 256;
+    float m_FillPercentage = 1.0f;
 
-    int m_PatternWidth = 16;
-    int m_PatternHeight = 16;
+    int m_PatternWidth = 32;
+    int m_PatternHeight = 32;
 
-    int m_PlacementSize = 8;
-    int m_PlacementSpacing = 16;
+    int m_PlacementSize = 3;
+    int m_PlacementSpacing = 12;
 
-    float m_JitterX = 0.0f;
-    float m_JitterY = 0.0f;
+    float m_JitterX = 0.75f;
+    float m_JitterY = 0.75f;
 
     PatternType m_PatternType = PatternType.Fill;
     int m_Threshold = 256;
