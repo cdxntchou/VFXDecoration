@@ -227,29 +227,14 @@ public class TerrainVFXState : MonoBehaviour
             this.isSpawning = true;
             RunSpawnStep();
 
-//             for (int tileZ = minCoord.tileZ; tileZ <= maxCoord.tileZ; tileZ++)
-//             {
-//                 for (int tileX = minCoord.tileX; tileX <= maxCoord.tileX; tileX++)
-//                 {
-//                     Terrain terrain = terrainMap.GetTerrain(tileX, tileZ);
-//                     if (terrain == null)
-//                         continue;
-//                     TerrainState terrainState = terrainStates[terrain];
-// 
-//                     // clip spawnBounds to the terrain tile
-//                     Rect terrainSpawnBounds = ClipRect(spawnBounds, terrainState.terrainBounds);
-// 
-//                     float spawnArea = terrainSpawnBounds.width * terrainSpawnBounds.height;
-//                     if (spawnArea > 0.0f)
-//                     {
-//                         SpawnInRect(terrain, terrainSpawnBounds);
-//                     }
-//                 }
-//             }
             liveBounds = ExpandRect(liveBounds, spawnBounds);
         }
     }
 
+    // spawning should all happen within one frame,
+    // but because the VFX system only does one spawn event,
+    // we amortize it over multiple frames (for now)
+    // this function loops through terrain tiles until we find one to spawn on that has not been updated yet
     void RunSpawnStep()
     {
         while(isSpawning)

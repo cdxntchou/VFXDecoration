@@ -1634,9 +1634,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   volumeSize: 24
   forwardBiasDistance: 16
-  spawnPattern: {fileID: 2800000, guid: fe64c3493027af54b94015d7d23255ca, type: 3}
+  spawnPattern: {fileID: 2800000, guid: f684ae9d394727c41a624268145903b7, type: 3}
   density: 1
-  spacing: 1
+  spacing: 0.5
   resetAndRespawn: 0
   debugLiveBounds: 1
 --- !u!73398921 &1900217573700910740
@@ -1786,13 +1786,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 415, y: 0, z: 44}
+      - m_Value: {x: 434, y: 0, z: 37}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 414, y: 0, z: 20}
+      - m_Value: {x: 433.5, y: 0, z: 13}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 427.21158, y: 10.499604, z: 42.94277}
+      - m_Value: {x: 422.2989, y: 11.049213, z: 37.89767}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1801,13 +1801,13 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 426, y: -1, z: 32}
+      - m_Value: {x: 422, y: 1.5, z: 25}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 24, y: 2000, z: 24}
         m_Name: tilingVolume_size
         m_Overridden: 1
-      - m_Value: {x: 1, y: 0, z: 24}
+      - m_Value: {x: 0.5, y: 1, z: 0.5}
         m_Name: createBoundsScale
         m_Overridden: 1
     m_Vector4f:
@@ -1818,10 +1818,10 @@ VisualEffect:
       - m_Value: {x: 0.4056604, y: 0.28083834, z: 0.23535956, w: 1}
         m_Name: alphamap_color2
         m_Overridden: 1
-      - m_Value: {x: 0, y: 0.02514701, z: 0.8867924, w: 1}
+      - m_Value: {x: 1, y: 1, z: 1, w: 0}
         m_Name: alphamap_color3
         m_Overridden: 1
-      - m_Value: {x: 1, y: 24, z: 414, w: 20}
+      - m_Value: {x: 1, y: 48, z: 867, w: 26}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 32, y: 32, z: 0.03125, w: 0.03125}
@@ -1831,7 +1831,7 @@ VisualEffect:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 24
+      - m_Value: 48
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1852,7 +1852,7 @@ VisualEffect:
       - m_Value: {fileID: 0}
         m_Name: terrain_normalmap
         m_Overridden: 1
-      - m_Value: {fileID: 2800000, guid: fe64c3493027af54b94015d7d23255ca, type: 3}
+      - m_Value: {fileID: 2800000, guid: f684ae9d394727c41a624268145903b7, type: 3}
         m_Name: createPattern
         m_Overridden: 1
     m_Bool:
