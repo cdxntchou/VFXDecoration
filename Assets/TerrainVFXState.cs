@@ -173,7 +173,7 @@ public class TerrainVFXState : MonoBehaviour
             vfx.SetVector3(TerrainVFXProperties.tilingVolumeSize, tilingVolumeSize);
 
             vfx.SetVector3(TerrainVFXProperties.fadeCenter, lodTransform.position);
-            vfx.SetFloat(TerrainVFXProperties.fadeDistance, volumeSize * 0.5f + forwardBiasDistance * 0.5f);
+            vfx.SetFloat(TerrainVFXProperties.fadeDistance, volumeSize * 0.5f + forwardBiasDistance);
         }
 
         if (isSpawning)
@@ -434,10 +434,16 @@ public class TerrainVFXState : MonoBehaviour
             int startZ = Mathf.RoundToInt(minZ / spacing);
 
             vfx.SetInt(TerrainVFXProperties.createCount, count);
-            vfx.SetVector4(TerrainVFXProperties.createParams, new Vector4(countX, countZ, startX, startZ));
+
+            if (vfx.HasVector4(TerrainVFXProperties.createParams))
+                vfx.SetVector4(TerrainVFXProperties.createParams, new Vector4(countX, countZ, startX, startZ));
+
             vfx.SetVector3(TerrainVFXProperties.createBoundsMin, new Vector3(minX, 0.0f, minZ));
-            vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
-            vfx.SetVector3(TerrainVFXProperties.createBoundsScale, new Vector3(spacing, 1.0f, spacing));
+            if (vfx.HasVector3(TerrainVFXProperties.createBoundsMax))
+                vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
+
+            if (vfx.HasVector3(TerrainVFXProperties.createBoundsScale))
+                vfx.SetVector3(TerrainVFXProperties.createBoundsScale, new Vector3(spacing, 1.0f, spacing));
 
             if (vfx.HasTexture(TerrainVFXProperties.createPattern))
                 vfx.SetTexture(TerrainVFXProperties.createPattern, spawnPattern);
@@ -447,7 +453,7 @@ public class TerrainVFXState : MonoBehaviour
                     new Vector4(spawnPattern.width, spawnPattern.height, 1.0f / spawnPattern.width, 1.0f / spawnPattern.height));
 
             vfx.SendEvent("CreateInBounds", null);
-            vfx.Simulate(1.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
+            // vfx.Simulate(1.0f, 1);                  // HACK: workaround for one event per frame limit -- not necessary with the incremental update algorithm
         }
     }
 }
