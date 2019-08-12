@@ -452,7 +452,7 @@ public class TerrainVFXState : MonoBehaviour
             vfx.SetVector4(TerrainVFXProperties.createParams, new Vector4(countX, countZ, startX, startZ));
             vfx.SetVector3(TerrainVFXProperties.createBoundsMin, new Vector3(minX, 0.0f, minZ));
             vfx.SetVector3(TerrainVFXProperties.createBoundsMax, new Vector3(maxX, 0.0f, maxZ));
-            vfx.SetVector3(TerrainVFXProperties.createBoundsScale, new Vector3(deltaX, 0.0f, deltaZ));
+            vfx.SetVector3(TerrainVFXProperties.createBoundsScale, new Vector3(spacing, 1.0f, spacing));
 
             if (vfx.HasTexture(TerrainVFXProperties.createPattern))
                 vfx.SetTexture(TerrainVFXProperties.createPattern, spawnPattern);
