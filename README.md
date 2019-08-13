@@ -11,8 +11,10 @@ Issues:
    this is because it has to amortize the respawn, as there is a bug in VFX that it
    can only handle one spawn event per frame
 
-   Spawning pattern is non-deterministic.
+   Random values are non-deterministic.
    If you look away then look back, you will get different results.
+   If you use the PatternGridSpawn node, you will get deterministic positions.
+   But we need a way to override VFX random seed to fix random non-determinism.
 
    Note: many properties are baked into the decoration on spawn.
    If you are modifying these (color, size, etc), and want to see live update,
