@@ -1698,13 +1698,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 455.5, y: 0, z: 197.75}
+      - m_Value: {x: 239, y: 0, z: 272.25}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 455.25, y: 0, z: -2.25}
+      - m_Value: {x: 39, y: 0, z: 72.25}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 285.26797, y: 9.581543, z: 160.31117}
+      - m_Value: {x: 209.57826, y: 4.6646514, z: 234.7107}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1713,22 +1713,34 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 355.5, y: -4.5, z: 97.75}
+      - m_Value: {x: 139, y: -7, z: 172.25}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 200, y: 2000, z: 200}
         m_Name: tilingVolume_size
         m_Overridden: 1
+      - m_Value: {x: 0.25, y: 1, z: 0.25}
+        m_Name: createBoundsScale
+        m_Overridden: 1
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 1, y: 0.4, z: 0.2, w: 0.2}
+      - m_Value: {x: 1, y: 0.76, z: 0.35, w: 0.5}
         m_Name: alphamapSize
+        m_Overridden: 1
+      - m_Value: {x: 800, y: 800, z: 156, w: 289}
+        m_Name: createParams
+        m_Overridden: 1
+      - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
+        m_Name: createPatternResolution
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 0.79, z: 1, w: 0.2}
+        m_Name: alphamapDensity
         m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 800
+      - m_Value: 640000
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1748,6 +1760,9 @@ VisualEffect:
         m_Overridden: 1
       - m_Value: {fileID: 0}
         m_Name: terrain_normalmap
+        m_Overridden: 1
+      - m_Value: {fileID: 2800000, guid: 579ea0c2c54048042a53950e878c2c3b, type: 3}
+        m_Name: createPattern
         m_Overridden: 1
     m_Bool:
       m_Array: []
@@ -1786,13 +1801,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 345.5, y: 0, z: 173}
+      - m_Value: {x: 219.5, y: 0, z: 247.5}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 345, y: 0, z: 103}
+      - m_Value: {x: 149.5, y: 0, z: 177.5}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 285.26797, y: 9.581543, z: 160.31117}
+      - m_Value: {x: 209.57826, y: 4.6646514, z: 234.7107}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1801,7 +1816,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 310.5, y: 4.5, z: 138}
+      - m_Value: {x: 184.5, y: 0.5, z: 212.5}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 70, y: 2000, z: 70}
@@ -1812,7 +1827,7 @@ VisualEffect:
         m_Overridden: 1
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0.22, y: 0.79, z: 0.42, w: 0.26}
+      - m_Value: {x: 0.22, y: 0.79, z: 0.63, w: 0.26}
         m_Name: alphamapSize
         m_Overridden: 1
       - m_Value: {x: 0.4056604, y: 0.28083834, z: 0.23535956, w: 1}
@@ -1821,23 +1836,26 @@ VisualEffect:
       - m_Value: {x: 0.2830189, y: 0.1968013, z: 0.16954434, w: 0}
         m_Name: alphamap_color3
         m_Overridden: 1
-      - m_Value: {x: 1, y: 140, z: 690, w: 206}
+      - m_Value: {x: 140, y: 140, z: 299, w: 355}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
         m_Name: createPatternResolution
         m_Overridden: 1
-      - m_Value: {x: -0.38, y: 0.1, z: 0.5, w: 1}
+      - m_Value: {x: -0.38, y: 0.1, z: 0.46, w: 1}
         m_Name: alphamapDensity
         m_Overridden: 1
       - m_Value: {x: 0.3207547, y: 0.1950915, z: 0.15583839, w: 1}
         m_Name: alphamap_color1
         m_Overridden: 1
+      - m_Value: {x: -0.2, y: -0.2, z: -0.13, w: -0.02}
+        m_Name: alphamapHeightOffset
+        m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
       m_Array:
-      - m_Value: 140
+      - m_Value: 19600
         m_Name: createCount
         m_Overridden: 1
     m_Matrix4x4f:
@@ -1896,7 +1914,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   volumeSize: 200
   forwardBiasDistance: 95
-  spawnPattern: {fileID: 2800000, guid: 263cd5bfdca5b4a429b3e3116cb5bbc4, type: 3}
+  spawnPattern: {fileID: 2800000, guid: 579ea0c2c54048042a53950e878c2c3b, type: 3}
   density: 20
   spacing: 0.25
   resetAndRespawn: 0
