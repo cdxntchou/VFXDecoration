@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: FoliageTerrain
   m_EditorClassIdentifier: 
   profile:
-    scatteringDistance: {r: 1.4980392, g: 1.4980392, b: 1.4980392, a: 1}
-    transmissionTint: {r: 2.270603, g: 2.270603, b: 2.270603, a: 1}
+    scatteringDistance: {r: 1.1353015, g: 1.1353015, b: 1.1353015, a: 1}
+    transmissionTint: {r: 11.984314, g: 11.984314, b: 11.984314, a: 1}
     texturingMode: 0
     transmissionMode: 1
-    thicknessRemap: {x: 0, y: 0.96425027}
+    thicknessRemap: {x: 0, y: 5.8696904}
     worldScale: 1
-    ior: 1.338
+    ior: 1.171
     hash: 1078011173
   m_Version: 1
   profiles: []
