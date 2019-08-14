@@ -320,8 +320,8 @@ MonoBehaviour:
     attributes: []
   m_Direction: 1
   m_LinkedSlots:
-  - {fileID: 40}
   - {fileID: 67}
+  - {fileID: 36}
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -620,8 +620,8 @@ MonoBehaviour:
   m_Direction: 1
   m_LinkedSlots:
   - {fileID: 23}
-  - {fileID: 36}
   - {fileID: 76}
+  - {fileID: 40}
 --- !u!114 &19
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1236,7 +1236,7 @@ MonoBehaviour:
       m_RegexMaxLength: 0
   m_Direction: 0
   m_LinkedSlots:
-  - {fileID: 18}
+  - {fileID: 9}
 --- !u!114 &37
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1379,7 +1379,7 @@ MonoBehaviour:
       m_RegexMaxLength: 0
   m_Direction: 0
   m_LinkedSlots:
-  - {fileID: 9}
+  - {fileID: 18}
 --- !u!114 &41
 MonoBehaviour:
   m_ObjectHideFlags: 0
