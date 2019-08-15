@@ -1698,13 +1698,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 239, y: 0, z: 272.25}
+      - m_Value: {x: 325.75, y: 0, z: 402.5}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 39, y: 0, z: 72.25}
+      - m_Value: {x: 125.75, y: 0, z: 202.5}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 209.57826, y: 4.6646514, z: 234.7107}
+      - m_Value: {x: 299.21548, y: 8.096172, z: 245.26405}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1713,7 +1713,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 139, y: -7, z: 172.25}
+      - m_Value: {x: 225.75, y: -11, z: 302.5}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 200, y: 2000, z: 200}
@@ -1727,7 +1727,7 @@ VisualEffect:
       - m_Value: {x: 1, y: 0.76, z: 0.35, w: 0.5}
         m_Name: alphamapSize
         m_Overridden: 1
-      - m_Value: {x: 800, y: 800, z: 156, w: 289}
+      - m_Value: {x: 800, y: 800, z: 503, w: 810}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
@@ -1801,13 +1801,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 219.5, y: 0, z: 247.5}
+      - m_Value: {x: 308, y: 0, z: 300.5}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 149.5, y: 0, z: 177.5}
+      - m_Value: {x: 238, y: 0, z: 230.5}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 209.57826, y: 4.6646514, z: 234.7107}
+      - m_Value: {x: 299.21548, y: 8.096172, z: 245.26405}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1816,7 +1816,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 184.5, y: 0.5, z: 212.5}
+      - m_Value: {x: 273, y: 1.5, z: 265.5}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 70, y: 2000, z: 70}
@@ -1836,7 +1836,7 @@ VisualEffect:
       - m_Value: {x: 0.2830189, y: 0.1968013, z: 0.16954434, w: 0}
         m_Name: alphamap_color3
         m_Overridden: 1
-      - m_Value: {x: 140, y: 140, z: 299, w: 355}
+      - m_Value: {x: 140, y: 140, z: 476, w: 461}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
@@ -1848,7 +1848,7 @@ VisualEffect:
       - m_Value: {x: 0.3207547, y: 0.1950915, z: 0.15583839, w: 1}
         m_Name: alphamap_color1
         m_Overridden: 1
-      - m_Value: {x: -0.2, y: -0.2, z: -0.13, w: -0.02}
+      - m_Value: {x: -0.02, y: -0.03, z: 0.02, w: -0.02}
         m_Name: alphamapHeightOffset
         m_Overridden: 1
     m_Uint:
