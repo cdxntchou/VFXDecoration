@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Experimental.VFX;
 using UnityEngine.Experimental.TerrainAPI;
 using System;
+using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -168,5 +169,27 @@ public class TerrainVFXController : MonoBehaviour
             tick = false;
         }
         resetAndRespawn = false;
+    }
+
+    public bool ContainsVFXState(TerrainVFXState vfxState)
+    {
+        if (vfxState != null)
+            return vfxStates.Contains(vfxState);
+        else return false;
+    }
+    public void UpdateVfxState()
+    {
+        vfxStates = GetComponentsInChildren<TerrainVFXState>();
+
+        // double check all VisualEffects have TerrainVFXStates attached
+        VisualEffect[] visualFX = GetComponentsInChildren<VisualEffect>();
+        foreach (VisualEffect vfx in visualFX)
+        {
+            TerrainVFXState vfxstate = vfx.GetComponent<TerrainVFXState>();
+            if (vfxstate == null)
+            {
+                Debug.LogError("Terrain VFX Object '" + vfx.gameObject.name + "' has a VisualEffect but no TerrainVFXState component, please add one");
+            }
+        }
     }
 }

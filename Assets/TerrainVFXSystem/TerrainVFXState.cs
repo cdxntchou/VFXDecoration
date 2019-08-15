@@ -49,6 +49,15 @@ public class TerrainVFXState : MonoBehaviour
     void OnEnable()
     {
         SceneView.duringSceneGui += OnSceneGUI;
+        var parentVFXController = this.gameObject.GetComponentInParent<TerrainVFXController>();
+        if (parentVFXController != null)
+        {
+            if (!parentVFXController.ContainsVFXState(this))
+            {
+                parentVFXController.UpdateVfxState();
+            }
+            parentVFXController.resetAndRespawn = true;
+        }
     }
 
     void OnDisable()
