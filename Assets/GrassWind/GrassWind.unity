@@ -1573,7 +1573,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lodTarget: {fileID: 531598549}
   resetAndRespawn: 1
-  continuousRespawnInEditor: 0
+  continuousRespawnInEditor: 1
   followSceneCameraInEditor: 1
   tick: 0
   alwaysTick: 1
@@ -1698,13 +1698,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 325.75, y: 0, z: 402.5}
+      - m_Value: {x: 319.75, y: 0, z: 370.5}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 125.75, y: 0, z: 202.5}
+      - m_Value: {x: 119.75, y: 0, z: 170.5}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 299.21548, y: 8.096172, z: 245.26405}
+      - m_Value: {x: 306.26904, y: 13.253186, z: 233.0015}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1713,7 +1713,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 225.75, y: -11, z: 302.5}
+      - m_Value: {x: 219.75, y: 2.25, z: 270.5}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 200, y: 2000, z: 200}
@@ -1727,7 +1727,7 @@ VisualEffect:
       - m_Value: {x: 1, y: 0.76, z: 0.35, w: 0.5}
         m_Name: alphamapSize
         m_Overridden: 1
-      - m_Value: {x: 800, y: 800, z: 503, w: 810}
+      - m_Value: {x: 800, y: 800, z: 479, w: 682}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
@@ -1735,6 +1735,18 @@ VisualEffect:
         m_Overridden: 1
       - m_Value: {x: 1, y: 0.79, z: 1, w: 0.2}
         m_Name: alphamapDensity
+        m_Overridden: 1
+      - m_Value: {x: 0.24191815, y: 0.2735849, z: 0.23616055, w: 1}
+        m_Name: alphamap_color0
+        m_Overridden: 1
+      - m_Value: {x: 0.16981131, y: 0.08985581, z: 0.04085083, w: 1}
+        m_Name: alphamap_color1
+        m_Overridden: 1
+      - m_Value: {x: 0.5283019, y: 0.22327486, z: 0.08721964, w: 1}
+        m_Name: alphamap_color2
+        m_Overridden: 1
+      - m_Value: {x: 0.31132078, y: 0.22022964, z: 0.1806248, w: 1}
+        m_Name: alphamap_color3
         m_Overridden: 1
     m_Uint:
       m_Array: []
@@ -1801,13 +1813,13 @@ VisualEffect:
       m_Array: []
     m_Vector3f:
       m_Array:
-      - m_Value: {x: 308, y: 0, z: 300.5}
+      - m_Value: {x: 310.5, y: 0, z: 281.5}
         m_Name: createBounds_max
         m_Overridden: 1
-      - m_Value: {x: 238, y: 0, z: 230.5}
+      - m_Value: {x: 240.5, y: 0, z: 211.5}
         m_Name: createBounds_min
         m_Overridden: 1
-      - m_Value: {x: 299.21548, y: 8.096172, z: 245.26405}
+      - m_Value: {x: 306.26904, y: 13.253186, z: 233.0015}
         m_Name: fadeCenter
         m_Overridden: 1
       - m_Value: {x: -50, y: 0, z: -50}
@@ -1816,7 +1828,7 @@ VisualEffect:
       - m_Value: {x: 600, y: 100, z: 600}
         m_Name: Heightmap_Size
         m_Overridden: 1
-      - m_Value: {x: 273, y: 1.5, z: 265.5}
+      - m_Value: {x: 275.5, y: 9.5, z: 246.5}
         m_Name: tilingVolume_center
         m_Overridden: 1
       - m_Value: {x: 70, y: 2000, z: 70}
@@ -1836,7 +1848,7 @@ VisualEffect:
       - m_Value: {x: 0.2830189, y: 0.1968013, z: 0.16954434, w: 0}
         m_Name: alphamap_color3
         m_Overridden: 1
-      - m_Value: {x: 140, y: 140, z: 476, w: 461}
+      - m_Value: {x: 140, y: 140, z: 481, w: 423}
         m_Name: createParams
         m_Overridden: 1
       - m_Value: {x: 64, y: 64, z: 0.015625, w: 0.015625}
