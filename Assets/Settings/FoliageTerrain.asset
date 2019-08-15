@@ -17,7 +17,7 @@ MonoBehaviour:
     transmissionTint: {r: 11.984314, g: 11.984314, b: 11.984314, a: 1}
     texturingMode: 0
     transmissionMode: 1
-    thicknessRemap: {x: 0, y: 5.8696904}
+    thicknessRemap: {x: 0, y: 3.7098632}
     worldScale: 1
     ior: 1.171
     hash: 1078011173
