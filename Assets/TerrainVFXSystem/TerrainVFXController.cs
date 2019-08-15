@@ -173,7 +173,7 @@ public class TerrainVFXController : MonoBehaviour
 
     public bool ContainsVFXState(TerrainVFXState vfxState)
     {
-        if (vfxState != null)
+        if (vfxState != null && vfxStates != null)
             return vfxStates.Contains(vfxState);
         else return false;
     }
