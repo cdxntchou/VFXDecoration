@@ -30,3 +30,4 @@ Issues:
    Undo has a similar issue.. it tries to hook undo/redo and trigger a reset/respawn (in case terrain was modified).
    But for some reason this is not very reliable.
    
+![image](https://drive.google.com/uc?export=view&id=1FSAfniuHxoegLQh9J6_858ub_WGxPa-q)
